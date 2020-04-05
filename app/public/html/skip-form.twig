@@ -1,0 +1,12 @@
+{% extends 'base.twig' %}
+
+{% block title %}Continue to next step{% endblock %}
+
+{% block content %}
+    <h1>Continue to next step</h1>
+
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <button type="submit" class="btn btn-primary">Proceed</button>
+    </form>
+{% endblock %}

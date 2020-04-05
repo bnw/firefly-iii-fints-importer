@@ -1,0 +1,20 @@
+{% extends 'base.twig' %}
+
+{% block title %}Your transactions{% endblock %}
+
+{% block content %}
+    <h1>Your transactions</h1>
+
+    {% for statement in statements %}
+        {% for transaction in statement.getTransactions() %}
+            <p>
+                Amount: {% if transaction.getCreditDebit == 'debit' %}-{% endif %} {{ transaction.getAmount() }} <br>
+                Booking text: {{ transaction.getBookingText() }} <br>
+                Name : {{ transaction.getName() }} <br>
+                Description : {{ transaction.getMainDescription() }} <br>
+                EREF : {{ transaction.getEndToEndID() }} <br>
+            </p>
+            <hr>
+        {% endfor %}
+    {% endfor %}
+{% endblock %}

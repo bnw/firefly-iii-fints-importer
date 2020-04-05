@@ -1,0 +1,34 @@
+{% extends 'base.twig' %}
+
+{% block title %}Choose account {% endblock %}
+
+{% block content %}
+    <h1>Choose an account to import from</h1>
+
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <div class="form-group">
+            <label for="account">Account</label>
+            <select class="form-control" name="account" id="account">
+                {% for index, account in accounts %}
+                    <option value="{{ index }}">
+                        {{ account.getAccountNumber() }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="date_from">Import start date</label>
+            <input class="form-control" name="date_from" id="date_from" type="date" required
+                   value="{{ default_from_date | date('Y-m-d') }}">
+        </div>
+        <div class="form-group">
+            <label for="date_to">Import end date</label>
+            <input class="form-control" name="date_to" id="date_to" type="date" required
+                   value="{{ default_to_date | date('Y-m-d') }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
+    </form>
+{% endblock %}

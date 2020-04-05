@@ -1,0 +1,25 @@
+{% extends 'base.twig' %}
+
+{% block title %}Enter TAN{% endblock %}
+
+{% block content %}
+    <h1>Enter TAN</h1>
+    <p>The bank requested a TAN, asking:</p>
+    <pre>{{ challenge }}</pre>
+    {% if device %}
+        <p>Please use this device:</p>
+        <pre>{{ device }}</pre>
+    {% endif %}
+    {% if challenge_image_src %}
+        <p><img src="{{ challenge_image_src|raw }}" alt="Challenge Image"></p>
+    {% endif %}
+
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <div class="form-group">
+            <label for="tan">TAN</label>
+            <input class="form-control" id="tan" name="tan" required style="font-family:monospace;">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}

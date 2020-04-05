@@ -1,0 +1,48 @@
+{% extends 'base.twig' %}
+
+{% block title %}Enter account data{% endblock %}
+
+{% block content %}
+    <h1>Enter account data</h1>
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <div class="form-group">
+            <label for="url">URL</label>
+            <input class="form-control" id="url" name="url" required style="font-family:monospace;">
+            <small class="form-text text-muted">
+                URL to your banks FinTS api, e.g.
+                <span class="text-monospace">https://banking-dkb.s-fints-pt-dkb.de/fints30</span>
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="bank_code">Bank-Code</label>
+            <input class="form-control" id="bank_code" name="bank_code" required style="font-family:monospace;">
+            <small class="form-text text-muted">
+                E.g. <span class="text-monospace">12030000</span>
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input class="form-control" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input class="form-control" id="password" name="password" type="password" required>
+            <small class="form-text text-muted">This is NOT the PIN of your bank card!</small>
+        </div>
+        <div class="form-group">
+            <label for="2FA">Two-Factor Method</label>
+            <select class="form-control" id="password" name="2fa" required>
+                <option value="910">chipTAN manuell</option>
+                <option selected value="911">chipTAN optisch</option>
+                <option value="912">chipTAN-USB</option>
+                <option value="913">chipTAN-QR</option>
+                <option value="920">smsTAN</option>
+                <option value="921">pushTAN</option>
+                <option value="900">iTAN</option>
+            </select>
+            <small class="form-text text-muted">Choose an option that you know works for your bank.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
