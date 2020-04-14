@@ -24,6 +24,12 @@ Requirements
   * A Personal Access Token which you can generate on the Profile page in Firefly III 
   
   
+Feedback
+--------
+So far, I could only test this with my personal bank.
+If you find that it does not work with your bank, please [open an issue](https://github.com/bnw/firefly-iii-fints-importer/issues/new).
+
+  
 Screenshots
 -----------
 <img src="https://raw.githubusercontent.com/bnw/firefly-iii-fints-importer/master/docs/img/screenshots.gif" alt="Screenshots of import tool">
