@@ -4,6 +4,8 @@
 
 {% block content %}
     <h1>Continue to next step</h1>
+    
+    <p>{{ message }}</p>
 
     <form action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">

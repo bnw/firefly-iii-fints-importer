@@ -27,14 +27,11 @@ class TanHandler
     private function create_or_continue_action(): void
     {
         if ($this->session->has($this->action_id)) {
-            echo "<br>ResumingAction<br>"; //TODO debug
             $this->action = unserialize($this->session->get($this->action_id));
             $this->session->remove($this->action_id);
             $this->fin_ts->submitTan($this->action, $this->session->get('tan'));
         } else {
-            echo "<br>New Action<br>"; //TODO debug
             $this->action = ($this->create_action_lambda)();
-            echo "<br>Needs login:" . (int)$this->needs_tan() . "<br>"; //TODO debug
         }
     }
 

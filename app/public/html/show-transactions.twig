@@ -4,17 +4,31 @@
 
 {% block content %}
     <h1>Your transactions</h1>
+    
+    <p>The following transactions will be imported to Firefly III.</p>
 
-    {% for statement in statements %}
-        {% for transaction in statement.getTransactions() %}
-            <p>
-                Amount: {% if transaction.getCreditDebit == 'debit' %}-{% endif %} {{ transaction.getAmount() }} <br>
-                Booking text: {{ transaction.getBookingText() }} <br>
-                Name : {{ transaction.getName() }} <br>
-                Description : {{ transaction.getMainDescription() }} <br>
-                EREF : {{ transaction.getEndToEndID() }} <br>
-            </p>
-            <hr>
-        {% endfor %}
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <button type="submit" class="btn btn-primary">Import transactions to FireflyIII</button>
+    </form>
+
+    <ul class="list-unstyled">
+    {% for transaction in transactions %}
+    <li class="mt-3">
+        <div class="card">
+            <div class="card-header">
+                <strong>
+                    {% if transaction.getCreditDebit == 'debit' %}-{% endif %}{{ transaction.getAmount() }}&euro;
+                </strong>
+                {% if transaction.getCreditDebit == 'debit' %}to{% else %}from{% endif %}
+                {{ transaction.getName() }}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    {{ transaction.getMainDescription() }}
+                </li>
+            </ul>
+        </div>
     {% endfor %}
+    </ul>
 {% endblock %}

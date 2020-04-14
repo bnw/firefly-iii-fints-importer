@@ -1,0 +1,40 @@
+{% extends 'base.twig' %}
+
+{% block title %}Import finished{% endblock %}
+
+{% block content %}
+    <h1>Import finished</h1>
+
+    <p>{{ total_num_transactions }} transactions have been sent to Firefly III.</p>
+
+    {% if import_messages is not empty %}
+        <div class="alert alert-warning">
+            For {{ import_messages | length }} transactions, Firefly III reported some problems which are listed below. <br>
+            These transactions were most likely not imported.
+        </div>
+    {% endif %}
+    
+    <ul class="list-unstyled">
+        {% for message in import_messages %}
+            <li class="mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <strong>
+                            {% if message.transaction.getCreditDebit == 'debit' %}-{% endif %}{{ message.transaction.getAmount() }}&euro;
+                        </strong>
+                        {% if message.transaction.getCreditDebit == 'debit' %}to{% else %}from{% endif %}
+                        {{ message.transaction.getName() }}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            {{ message.transaction.getMainDescription() }}
+                        </li>
+                        {% for error in message.messages %}
+                            <li class="list-group-item alert-warning">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

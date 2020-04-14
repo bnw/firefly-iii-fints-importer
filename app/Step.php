@@ -8,4 +8,5 @@ class Step extends \MyCLabs\Enum\Enum
     public const STEP2_LOGIN = 'STEP2_LOGIN';
     public const STEP3_CHOOSE_ACCOUNT = 'STEP3_CHOOSE_ACCOUNT';
     public const STEP4_GET_IMPORT_DATA = 'STEP4_GET_IMPORT_DATA';
+    public const STEP5_RUN_IMPORT = 'STEP5_RUN_IMPORT';
 }

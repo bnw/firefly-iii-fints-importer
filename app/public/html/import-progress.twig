@@ -1,0 +1,22 @@
+{% extends 'base.twig' %}
+
+{% block title %}Import in progress...{% endblock %}
+
+{% block content %}
+    <h1>Import in progress...</h1>
+    
+    <p>
+    <progress value="{{num_transactions_processed}}" max="{{ total_num_transactions }}"></progress><br>
+    {{num_transactions_processed}} of {{ total_num_transactions }} transactions have been sent to FireflyIII.
+    </p>
+
+    <form action="." method="post" id="continue-form">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <button id="continue-button" type="submit" class="btn btn-primary">Continue import</button>
+    </form>
+    
+    <script>
+        document.getElementById("continue-button").disabled = true; 
+        document.getElementById("continue-form").submit(); 
+    </script>
+{% endblock %}

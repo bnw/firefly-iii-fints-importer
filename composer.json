@@ -3,7 +3,9 @@
     "nemiah/php-fints": "dev-master",
     "twig/twig": "^3.0",
     "symfony/http-foundation": "^5.0",
-    "myclabs/php-enum": "^1.7"
+    "myclabs/php-enum": "^1.7",
+    "firefly-iii/api-support-classes": "dev-master",
+    "ext-bcmath": "*"
   },
   "autoload": {
     "psr-4": {
