@@ -1,5 +1,5 @@
 This tool allows you to import transactions from your [FinTS enabled bank](https://subsembly.com/banken.html) into [Firefly III](https://www.firefly-iii.org/).  
-It comes with a web GUI that guides you through the required steps.
+It comes with a web GUI that guides you through the process.
 
 Usage
 -----
