@@ -12,6 +12,13 @@ composer install
 php -S 0.0.0.0:8080 app/index.php
 ```
 
+Alternatively, you can use docker-compose:
+```
+git clone https://github.com/bnw/firefly-iii-fints-importer.git
+cd firefly-iii-fints-importer
+docker-compose up
+```
+
 Browse to http://localhost:8080 and follow the instructions 🙂
 
 
