@@ -10,7 +10,7 @@ class FinTsFactory
 {
     static function create_from_session(Session $session)
     {
-        foreach(['url','bank_code','username','password','2fa'] as $required_session_value){
+        foreach(['bank_url','bank_code','bank_username','bank_password','bank_2fa'] as $required_session_value){
             assert($session->has($required_session_value), "Missing value in sessions for: " . $required_session_value);
         }
         $finTs = new \Fhp\FinTsNew(
