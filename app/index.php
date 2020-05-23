@@ -78,7 +78,8 @@ switch ((string)$current_step) {
             $session,
             $twig,
             $fin_ts,
-            $current_step
+            $current_step,
+            $request
         );
         if ($login_handler->needs_tan()) {
             $login_handler->pose_and_render_tan_challenge();
@@ -106,7 +107,8 @@ switch ((string)$current_step) {
             $session,
             $twig,
             $fin_ts,
-            $current_step
+            $current_step,
+            $request
         );
         if ($list_accounts_handler->needs_tan()) {
             $list_accounts_handler->pose_and_render_tan_challenge();
@@ -151,7 +153,8 @@ switch ((string)$current_step) {
             $session,
             $twig,
             $fin_ts,
-            $current_step
+            $current_step,
+            $request
         );
         if ($soa_handler->needs_tan()) {
             $soa_handler->pose_and_render_tan_challenge();

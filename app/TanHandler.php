@@ -12,7 +12,13 @@ use Twig\Environment;
 class TanHandler
 {
     public function __construct(
-        callable $create_action_lambda, string $action_id, Session $session, Environment $twig, FinTsNew $fin_ts, \App\Step $current_step
+        callable $create_action_lambda,
+        string $action_id,
+        Session $session,
+        Environment $twig,
+        FinTsNew $fin_ts,
+        \App\Step $current_step,
+        \Symfony\Component\HttpFoundation\Request $request
     )
     {
         $this->create_action_lambda = $create_action_lambda;
@@ -21,6 +27,7 @@ class TanHandler
         $this->twig                 = $twig;
         $this->fin_ts               = $fin_ts;
         $this->current_step         = $current_step;
+        $this->request              = $request;
         $this->create_or_continue_action();
     }
 
@@ -29,7 +36,7 @@ class TanHandler
         if ($this->session->has($this->action_id)) {
             $this->action = unserialize($this->session->get($this->action_id));
             $this->session->remove($this->action_id);
-            $this->fin_ts->submitTan($this->action, $this->session->get('tan'));
+            $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
         } else {
             $this->action = ($this->create_action_lambda)();
         }
@@ -82,4 +89,5 @@ class TanHandler
     private $twig;
     private $fin_ts;
     private $current_step;
+    private $request;
 }
