@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bnw/firefly-iii-fints-importer.svg?branch=master)](https://travis-ci.org/bnw/firefly-iii-fints-importer)
+
 This tool allows you to import transactions from your [FinTS enabled bank](https://subsembly.com/banken.html) into [Firefly III](https://www.firefly-iii.org/).  
 It comes with a web GUI that guides you through the process.
 
