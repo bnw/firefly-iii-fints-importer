@@ -1,0 +1,23 @@
+{% extends 'base.twig' %}
+
+{% block title %}Choose Tan Device{% endblock %}
+
+{% block content %}
+    <h1>Choose a device for your tan method.</h1>
+
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <div class="form-group">
+            <label for="bank_2fa_device">Tan Device</label>
+            <select class="form-control" name="bank_2fa_device" id="bank_2fa_device" required>
+                {% for device in devices %}
+                    <option value="{{ device.getName() }}">
+                        {{ device.getName() }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
+    </form>
+{% endblock %}

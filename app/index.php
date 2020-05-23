@@ -30,10 +30,10 @@ switch ((string)$current_step) {
         echo $twig->render(
             'collecting-data.twig',
             array(
-                'next_step' => Step::STEP2_LOGIN
+                'next_step' => Step::STEP1p5_CHOOSE_2FA_DEVICE
             ));
         break;
-    case Step::STEP2_LOGIN:
+    case Step::STEP1p5_CHOOSE_2FA_DEVICE:
         $session->invalidate();
         $session->set('bank_username', $request->request->get('bank_username'));
         // Hm, this most likely stores the password on disk somewhere. Could we at least scramble it a bit?
@@ -43,6 +43,30 @@ switch ((string)$current_step) {
         $session->set('bank_2fa', $request->request->get('bank_2fa'));
         $session->set('firefly_url', $request->request->get('firefly_url'));
         $session->set('firefly_access_token', $request->request->get('firefly_access_token'));
+        $fin_ts   = FinTsFactory::create_from_session($session);
+        $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
+
+        if ($tan_mode->needsTanMedium()) {
+            echo $twig->render(
+                'choose-2fa-device.twig',
+                array(
+                    'next_step' => Step::STEP2_LOGIN,
+                    'devices' => $fin_ts->getTanMedia($tan_mode)
+                ));
+        } else {
+            echo $twig->render(
+                'skip-form.twig',
+                array(
+                    'next_step' => Step::STEP2_LOGIN,
+                    'message' => "Your chosen tan mode does not require you to choose a device."
+                )
+            );
+        }
+        break;
+    case Step::STEP2_LOGIN:
+        if ($request->request->has('bank_2fa_device')) {
+            $session->set('bank_2fa_device', $request->request->get('bank_2fa_device'));
+        }
 
         $fin_ts        = FinTsFactory::create_from_session($session);
         $login_handler = new TanHandler(
