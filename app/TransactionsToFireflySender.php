@@ -65,7 +65,8 @@ class TransactionsToFireflySender
             $response = $request->post();
             if ($response instanceof ValidationErrorResponse) {
                 $errors = $response->errors->all();
-                $errors[] = json_encode($request->getBody());
+                $errors[] = "Firefly III request: " . json_encode($request->getBody());
+                $errors[] = "Transaction data: " . print_r($transaction, true);
                 $result[] = array('transaction' => $transaction, 'messages' => $errors);
             } else if ($response instanceof PostTransactionResponse) {
                 //everything went fine :)
