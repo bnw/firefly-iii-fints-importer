@@ -55,6 +55,8 @@ class TanHandler
             } catch (\RuntimeException $e) {
                 $challengeImageSrc = null;
             }
+        }else{
+            $challengeImageSrc = null;
         }
         echo $this->twig->render(
             'tan-challenge.twig',
