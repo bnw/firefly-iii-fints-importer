@@ -3,6 +3,9 @@
 
 namespace App;
 
+use Fhp\FinTs;
+use Fhp\Options\Credentials;
+use Fhp\Options\FinTsOptions;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 
@@ -13,15 +16,16 @@ class FinTsFactory
         foreach(['bank_url','bank_code','bank_username','bank_password','bank_2fa'] as $required_session_value){
             assert($session->has($required_session_value), "Missing value in sessions for: " . $required_session_value);
         }
-        $finTs = new \Fhp\FinTsNew(
-            $session->get('bank_url'),
-            $session->get('bank_code'),
-            $session->get('bank_username'),
-            $session->get('bank_password'),
-            '0F4CA8A225AC9799E6BE3F334', // https://github.com/firefly-iii/firefly-iii/issues/3233#issuecomment-609050579
-            '1.0'
-        );
-
+        $options = new FinTsOptions();
+        $options->url = $session->get('bank_url');
+        $options->bankCode = $session->get('bank_code');
+        $options->productName = '0F4CA8A225AC9799E6BE3F334'; // https://github.com/firefly-iii/firefly-iii/issues/3233#issuecomment-609050579
+        $options->productVersion = '1.0';
+        
+        $credentials = Credentials::create($session->get('bank_username'), $session->get('bank_password'));
+        
+        $finTs = FinTs::new($options, $credentials);
+        
         $tanMode = self::get_tan_mode($finTs, $session);
 
         if ($tanMode->needsTanMedium() and $session->has('bank_2fa_device')) {
@@ -38,7 +42,7 @@ class FinTsFactory
         return $finTs;
     }
 
-    static function get_tan_mode(\Fhp\FinTsNew $finTs, Session $session)
+    static function get_tan_mode(FinTs $finTs, Session $session)
     {
         $tanModeId = intval($session->get('bank_2fa'));
         $tanMode   = $finTs->getTanModes()[$tanModeId];

@@ -5,7 +5,7 @@ namespace App;
 
 
 use Fhp\BaseAction;
-use Fhp\FinTsNew;
+use Fhp\FinTs;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Twig\Environment;
 
@@ -16,7 +16,7 @@ class TanHandler
         string $action_id,
         Session $session,
         Environment $twig,
-        FinTsNew $fin_ts,
+        FinTs $fin_ts,
         \App\Step $current_step,
         \Symfony\Component\HttpFoundation\Request $request
     )

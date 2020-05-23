@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "086c7c873d4c5c1b08fed9977691e6ff",
+    "content-hash": "dfe2afa1119ac7fe15fe5719962f5a13",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -509,12 +509,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nemiah/phpFinTS.git",
-                "reference": "7796f4ad31c3a29b67ababb82904bd8dba00355b"
+                "reference": "13f4c5f5e85af9fcb30ec52bcc85069edae98936"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nemiah/phpFinTS/zipball/7796f4ad31c3a29b67ababb82904bd8dba00355b",
-                "reference": "7796f4ad31c3a29b67ababb82904bd8dba00355b",
+                "url": "https://api.github.com/repos/nemiah/phpFinTS/zipball/13f4c5f5e85af9fcb30ec52bcc85069edae98936",
+                "reference": "13f4c5f5e85af9fcb30ec52bcc85069edae98936",
                 "shasum": ""
             },
             "require": {
@@ -545,7 +545,7 @@
             ],
             "description": "PHP Library for the protocols fints and hbci",
             "homepage": "https://github.com/nemiah/phpFinTS",
-            "time": "2020-04-10T13:05:55+00:00"
+            "time": "2020-04-25T12:16:09+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -1458,6 +1458,9 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "ext-bcmath": "*",
+        "ext-json": "*"
+    },
     "platform-dev": []
 }
