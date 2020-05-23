@@ -1,0 +1,11 @@
+language: php
+
+services:
+  - docker
+
+install:
+  - docker-compose up -d
+
+script:
+  - docker-compose ps | grep -q app
+  - curl localhost:8080
