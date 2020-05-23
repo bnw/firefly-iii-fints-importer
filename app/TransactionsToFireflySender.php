@@ -42,6 +42,11 @@ class TransactionsToFireflySender
                 [$source, $destination] = [$destination, $source];
             }
 
+            $description = $transaction->getMainDescription();
+            if($destination == ""){
+                $description = $transaction->getBookingText();
+            }
+            
             $request->setBody(array(
                     'apply_rules' => true,
                     'error_if_duplicate_hash' => true,
@@ -50,7 +55,7 @@ class TransactionsToFireflySender
                             'type' => $type,
                             'date' => $transaction->getValutaDate()->format('Y-m-d'),
                             'amount' => $amount,
-                            'description' => $transaction->getMainDescription(),
+                            'description' => $description,
                             'source_name' => $source['name'] ?? null,
                             'source_id' => $source['id'] ?? null,
                             'source_iban' => $source['iban'] ?? null,
