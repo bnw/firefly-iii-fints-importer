@@ -41,7 +41,6 @@ class FinTsFactory
     static function get_tan_mode(\Fhp\FinTsNew $finTs, Session $session)
     {
         $tanModeId = intval($session->get('bank_2fa'));
-        var_dump($finTs->getTanModes());
         $tanMode   = $finTs->getTanModes()[$tanModeId];
         assert($tanMode->getId() == $tanModeId);
         return $tanMode;
