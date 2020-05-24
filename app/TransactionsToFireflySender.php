@@ -43,7 +43,7 @@ class TransactionsToFireflySender
             }
 
             $description = $transaction->getMainDescription();
-            if($destination == ""){
+            if($description == ""){
                 $description = $transaction->getBookingText();
             }
             
