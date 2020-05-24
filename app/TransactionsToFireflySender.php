@@ -24,6 +24,15 @@ class TransactionsToFireflySender
         $this->firefly_access_token = $firefly_access_token;
         $this->firefly_account_id   = $firefly_account_id;
     }
+    
+    public function get_iban(Transaction $transaction){
+        $iban_helper = new \IBAN;
+        if($iban_helper->Verify($transaction->getAccountNumber())){
+            return $transaction->getAccountNumber();
+        }else{
+            return null;
+        }
+    }
 
     public function send_transactions()
     {
@@ -33,7 +42,7 @@ class TransactionsToFireflySender
             $debitOrCredit = $transaction->getCreditDebit();
             $amount        = $transaction->getAmount();
             $source        = array('id' => $this->firefly_account_id);
-            $destination   = array('iban' => $transaction->getAccountNumber(), 'name' => $transaction->getName());
+            $destination   = array('iban' => $this->get_iban($transaction), 'name' => $transaction->getName());
 
             if ($debitOrCredit !== Transaction::CD_CREDIT) {
                 $type = TransactionType::WITHDRAWAL;

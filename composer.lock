@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "dfe2afa1119ac7fe15fe5719962f5a13",
+    "content-hash": "e157e0875e6c226fe45e532e5dd3beda",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -161,6 +161,34 @@
                 "transfers"
             ],
             "time": "2020-04-05T08:50:04+00:00"
+        },
+        {
+            "name": "globalcitizen/php-iban",
+            "version": "v2.7.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/globalcitizen/php-iban.git",
+                "reference": "4c0fc54877948ac667c0ab29c2d1afbe47705599"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/globalcitizen/php-iban/zipball/4c0fc54877948ac667c0ab29c2d1afbe47705599",
+                "reference": "4c0fc54877948ac667c0ab29c2d1afbe47705599",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "oophp-iban.php",
+                    "php-iban.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-only"
+            ],
+            "description": "php-iban is a library for parsing and validating IBAN (and IIBAN) bank account information.",
+            "time": "2020-05-03T19:46:35+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
