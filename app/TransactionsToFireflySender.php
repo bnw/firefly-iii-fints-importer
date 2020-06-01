@@ -24,61 +24,72 @@ class TransactionsToFireflySender
         $this->firefly_access_token = $firefly_access_token;
         $this->firefly_account_id   = $firefly_account_id;
     }
-    
-    public function get_iban(Transaction $transaction){
+
+    public static function get_iban(Transaction $transaction)
+    {
         $iban_helper = new \IBAN;
-        if($iban_helper->Verify($transaction->getAccountNumber())){
+        if ($iban_helper->Verify($transaction->getAccountNumber())) {
             return $transaction->getAccountNumber();
-        }else{
+        } else {
             return null;
         }
+    }
+
+    public static function transform_transaction_to_firefly_request_body(
+        Transaction $transaction,
+        int $firefly_account_id
+    )
+    {
+        $debitOrCredit = $transaction->getCreditDebit();
+        $amount        = $transaction->getAmount();
+        $source        = array('id' => $firefly_account_id);
+        $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
+
+        if ($debitOrCredit !== Transaction::CD_CREDIT) {
+            $type = TransactionType::WITHDRAWAL;
+        } else {
+            $type = TransactionType::DEPOSIT;
+            [$source, $destination] = [$destination, $source];
+        }
+
+        $description = $transaction->getMainDescription();
+        if ($description == "") {
+            $description = $transaction->getBookingText();
+        }
+
+        return array(
+            'apply_rules' => true,
+            'error_if_duplicate_hash' => true,
+            'transactions' => array(
+                array(
+                    'type' => $type,
+                    'date' => $transaction->getValutaDate()->format('Y-m-d'),
+                    'amount' => $amount,
+                    'description' => $description,
+                    'source_name' => $source['name'] ?? null,
+                    'source_id' => $source['id'] ?? null,
+                    'source_iban' => $source['iban'] ?? null,
+                    'destination_name' => $destination['name'] ?? null,
+                    'destination_id' => $destination['id'] ?? null,
+                    'destination_iban' => $destination['iban'] ?? null,
+                )
+            )
+        );
     }
 
     public function send_transactions()
     {
         $result = array();
         foreach ($this->transactions as $transaction) {
-            $request       = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
-            $debitOrCredit = $transaction->getCreditDebit();
-            $amount        = $transaction->getAmount();
-            $source        = array('id' => $this->firefly_account_id);
-            $destination   = array('iban' => $this->get_iban($transaction), 'name' => $transaction->getName());
+            $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
-            if ($debitOrCredit !== Transaction::CD_CREDIT) {
-                $type = TransactionType::WITHDRAWAL;
-            } else {
-                $type = TransactionType::DEPOSIT;
-                [$source, $destination] = [$destination, $source];
-            }
-
-            $description = $transaction->getMainDescription();
-            if($description == ""){
-                $description = $transaction->getBookingText();
-            }
-            
-            $request->setBody(array(
-                    'apply_rules' => true,
-                    'error_if_duplicate_hash' => true,
-                    'transactions' => array(
-                        array(
-                            'type' => $type,
-                            'date' => $transaction->getValutaDate()->format('Y-m-d'),
-                            'amount' => $amount,
-                            'description' => $description,
-                            'source_name' => $source['name'] ?? null,
-                            'source_id' => $source['id'] ?? null,
-                            'source_iban' => $source['iban'] ?? null,
-                            'destination_name' => $destination['name'] ?? null,
-                            'destination_id' => $destination['id'] ?? null,
-                            'destination_iban' => $destination['iban'] ?? null,
-                        )
-                    )
-                )
+            $request->setBody(
+                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id)
             );
 
             $response = $request->post();
             if ($response instanceof ValidationErrorResponse) {
-                $errors = $response->errors->all();
+                $errors   = $response->errors->all();
                 $errors[] = "Firefly III request: " . json_encode($request->getBody());
                 $errors[] = "Transaction data: " . print_r($transaction, true);
                 $result[] = array('transaction' => $transaction, 'messages' => $errors);
