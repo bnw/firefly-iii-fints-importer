@@ -5,7 +5,9 @@ services:
 
 install:
   - docker-compose up -d
+  - composer install --dev
 
 script:
   - docker-compose ps | grep -q app
   - curl localhost:8080
+  - ./vendor/bin/phpunit tests
