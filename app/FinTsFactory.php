@@ -4,6 +4,7 @@
 namespace App;
 
 use Fhp\FinTs;
+use Fhp\Model\NoPsd2TanMode;
 use Fhp\Options\Credentials;
 use Fhp\Options\FinTsOptions;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -44,9 +45,16 @@ class FinTsFactory
 
     static function get_tan_mode(FinTs $finTs, Session $session)
     {
-        $tanModeId = intval($session->get('bank_2fa'));
-        $tanMode   = $finTs->getTanModes()[$tanModeId];
-        assert($tanMode->getId() == $tanModeId);
-        return $tanMode;
+        $tanModeId = $session->get('bank_2fa');
+        
+        if($tanModeId == 'NoPsd2TanMode'){
+            // See https://github.com/nemiah/phpFinTS/issues/57
+            return new NoPsd2TanMode();
+        }else{
+            $tanModeId = intval($tanModeId);
+            $tanMode   = $finTs->getTanModes()[$tanModeId];
+            assert($tanMode->getId() == $tanModeId);
+            return $tanMode;
+        }
     }
 }
