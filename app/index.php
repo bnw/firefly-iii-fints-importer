@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\FinTsFactory;
+use App\ConfigurationFactory;
 use App\TanHandler;
 use App\TransactionsToFireflySender;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,19 +20,73 @@ $twig   = new \Twig\Environment($loader);
 
 $request = Request::createFromGlobals();
 
-$current_step = new Step($request->request->get("step", Step::STEP1_COLLECTING_DATA));
+$current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
 
 $session = new Session();
 $session->start();
 
 
 switch ((string)$current_step) {
-    case Step::STEP1_COLLECTING_DATA:
+    case Step::STEP0_SETUP:
+        $configuration_files = array();
+        $dirs = array('/app/configurations', 'configurations');
+        foreach($dirs as $dir){
+            if (file_exists($dir))
+                $configuration_files = array_merge($configuration_files,
+                    preg_filter('/^/', $dir.'/', array_diff(scandir($dir), array('.', '..') )));
+        }
+
         echo $twig->render(
-            'collecting-data.twig',
+            'setup.twig',
             array(
-                'next_step' => Step::STEP1p5_CHOOSE_2FA_DEVICE
+                'files' => $configuration_files,
+                'next_step' => Step::STEP1_COLLECTING_DATA
             ));
+        break;
+    case Step::STEP1_COLLECTING_DATA:
+        if($request->request->get('data_collect_mode') == "createNewDataset"){
+            echo $twig->render(
+                'collecting-data.twig',
+                array(
+                    'next_step' => Step::STEP1p5_CHOOSE_2FA_DEVICE
+                ));
+        }else{
+            $session->invalidate();
+
+            $filename = $request->request->get('data_collect_mode');
+            $configuration = ConfigurationFactory::load_from_file($filename);
+
+            $session->set('bank_username',        $configuration->bank_username);
+            $session->set('bank_password',        $configuration->bank_password);
+            $session->set('bank_url',             $configuration->bank_url);
+            $session->set('bank_code',            $configuration->bank_code);
+            $session->set('bank_2fa',             $configuration->bank_2fa);
+            $session->set('firefly_url',          $configuration->firefly_url);
+            $session->set('firefly_access_token', $configuration->firefly_access_token);
+
+            $fin_ts   = FinTsFactory::create_from_session($session);
+            $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
+
+            if ($tan_mode->needsTanMedium()) {
+                echo $twig->render(
+                    'choose-2fa-device.twig',
+                    array(
+                        'next_step' => Step::STEP2_LOGIN,
+                        'devices' => $fin_ts->getTanMedia($tan_mode)
+                    ));
+            } else {
+                echo $twig->render(
+                    'skip-form.twig',
+                    array(
+                        'next_step' => Step::STEP2_LOGIN,
+                        'message' => "Your chosen tan mode does not require you to choose a device."
+                    )
+                );
+            }
+        }
+
+
+
         break;
     case Step::STEP1p5_CHOOSE_2FA_DEVICE:
         $session->invalidate();

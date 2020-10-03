@@ -1,0 +1,24 @@
+{% extends 'base.twig' %}
+
+{% block title %}Enter account data{% endblock %}
+
+{% block content %}
+    <h1>Choose data source</h1>
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <fieldset class="mt-3">
+            <legend>Data Source</legend>
+            <div class="form-group">
+                <label for="bank_sfa">Choose file from configurations folder or </label>
+                <select class="form-control" id="data_collect_mode" name="data_collect_mode" required>
+                    {% for file in files %}
+                        <option value="{{ file }}">{{ file }}</option>
+                    {% endfor %}
+                    <option value="createNewDataset">Configure Dataset</option>
+                </select>
+                <small class="form-text text-muted">Choose an configuration file or configure it manual.</small>
+            </div>
+        </fieldset>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
