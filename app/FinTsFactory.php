@@ -52,7 +52,12 @@ class FinTsFactory
             return new NoPsd2TanMode();
         }else{
             $tanModeId = intval($tanModeId);
-            $tanMode   = $finTs->getTanModes()[$tanModeId];
+            $tanModes = $finTs->getTanModes();
+            assert(
+                array_key_exists($tanModeId, $tanModes), 
+                "Your bank did not accept your tan mode $tanModeId. Accepted modes are: " . implode(", ", array_keys($tanModes))
+            );
+            $tanMode = $tanModes[$tanModeId];
             assert($tanMode->getId() == $tanModeId);
             return $tanMode;
         }
