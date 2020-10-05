@@ -1,0 +1,9 @@
+{
+  "bank_username": "",
+  "bank_password": "",
+  "bank_code": "51091500",
+  "bank_url": "https://hbci11.fiducia.de/cgi-bin/hbciservlet",
+  "bank_2fa": "944",
+  "firefly_url": "",
+  "firefly_access_token": ""
+}
