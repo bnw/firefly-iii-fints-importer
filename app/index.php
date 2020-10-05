@@ -29,7 +29,7 @@ $session->start();
 switch ((string)$current_step) {
     case Step::STEP0_SETUP:
         $configuration_files = array();
-        $dirs = array('/app/configurations', 'configurations');
+        $dirs = array('/app/configurations', 'data/configurations');
         foreach($dirs as $dir){
             if (file_exists($dir))
                 $configuration_files = array_merge($configuration_files,
