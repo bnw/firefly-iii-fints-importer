@@ -33,7 +33,7 @@ switch ((string)$current_step) {
         foreach($dirs as $dir){
             if (file_exists($dir))
                 $configuration_files = array_merge($configuration_files,
-                    preg_filter('/^/', $dir.'/', array_diff(scandir($dir), array('.', '..') )));
+                    preg_filter('/^/', $dir.DIRECTORY_SEPARATOR, array_diff(scandir($dir), array('.', '..') )));
         }
 
         echo $twig->render(
