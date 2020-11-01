@@ -5,23 +5,26 @@ It comes with a web GUI that guides you through the process.
 
 Startup
 -------
+To start the app, choose one of the three methods below:
 
-Start the app by executing the following commands.
-```
-git clone https://github.com/bnw/firefly-iii-fints-importer.git
-cd firefly-iii-fints-importer
-composer install
-php -S 0.0.0.0:8080 app/index.php
-```
+* Start the app by executing the following commands.
+  ```
+  git clone https://github.com/bnw/firefly-iii-fints-importer.git
+  cd firefly-iii-fints-importer
+  composer install
+  php -S 0.0.0.0:8080 app/index.php
+  ```
 
-Alternatively, you can use docker-compose:
-```
-git clone https://github.com/bnw/firefly-iii-fints-importer.git
-cd firefly-iii-fints-importer
-docker-compose up
-```
+* Alternatively, you can use docker-compose. The following will build the image locally and should work on any architecture (amd64, arm, ...).
+  ```
+  git clone https://github.com/bnw/firefly-iii-fints-importer.git
+  cd firefly-iii-fints-importer
+  docker-compose up
+  ```
 
-Browse to http://localhost:8080 and follow the instructions 🙂
+* For amd64 machines, https://hub.docker.com/r/benkl/firefly-iii-fints-importer provides prebuild images. Simply follow the above steps for docker-compose, but replace the line `build: .` by `image: benkl/firefly-iii-fints-importer` in the [`docker-compose.yml`](blob/master/docker-compose.yml). This saves you a few minutes of build time.
+
+After completing one of the above steps, browse to http://localhost:8080 and follow the instructions 🙂
 
 Storing configurations
 ----------------------
