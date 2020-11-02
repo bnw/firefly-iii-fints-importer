@@ -22,7 +22,7 @@ To start the app, choose one of the three methods below:
   docker-compose up
   ```
 
-* For amd64 machines, https://hub.docker.com/r/benkl/firefly-iii-fints-importer provides prebuild images. Simply follow the above steps for docker-compose, but replace the line `build: .` by `image: benkl/firefly-iii-fints-importer` in the [`docker-compose.yml`](blob/master/docker-compose.yml). This saves you a few minutes of build time.
+* For amd64 machines, https://hub.docker.com/r/benkl/firefly-iii-fints-importer provides prebuild images. Simply follow the above steps for docker-compose, but replace the line `build: .` by `image: benkl/firefly-iii-fints-importer` in the [`docker-compose.yml`](docker-compose.yml). This saves you a few minutes of build time.
 
 After completing one of the above steps, browse to http://localhost:8080 and follow the instructions 🙂
 
