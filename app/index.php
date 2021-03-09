@@ -50,11 +50,26 @@ switch ((string)$current_step) {
                 array(
                     'next_step' => Step::STEP1p5_CHOOSE_2FA_DEVICE
                 ));
-        }else{
+        } else {
             $session->invalidate();
 
             $filename = $request->request->get('data_collect_mode');
             $configuration = ConfigurationFactory::load_from_file($filename);
+
+            if ($configuration->bank_username == "" || $configuration->bank_password == "") {
+                $configuration->bank_username = $request->request->get('bank_username');
+                $configuration->bank_password = $request->request->get('bank_password');
+                if ($configuration->bank_username == "" || $configuration->bank_password == "") {
+                    echo $twig->render(
+                        'collecting-data.twig',
+                        array(
+                            'next_step' => Step::STEP1_COLLECTING_DATA,
+                            'configuration' => $configuration,
+                            'data_collect_mode' => $filename
+                        ));
+                    break;
+                }
+            }
 
             $session->set('bank_username',        $configuration->bank_username);
             $session->set('bank_password',        $configuration->bank_password);

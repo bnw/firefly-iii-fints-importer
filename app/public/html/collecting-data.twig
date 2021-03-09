@@ -8,6 +8,7 @@
         <input type="hidden" name="step" value="{{ next_step }}">
         <fieldset class="mt-3">
             <legend>Bank Data</legend>
+	    {% if configuration.bank_url == "" %}
             <div class="form-group">
                 <label for="bank_url">URL</label>
                 <input class="form-control" id="bank_url" name="bank_url" required style="font-family:monospace;">
@@ -16,6 +17,8 @@
                     <span class="text-monospace">https://banking-dkb.s-fints-pt-dkb.de/fints30</span>
                 </small>
             </div>
+	    {% endif %}
+	    {% if configuration.bank_code == "" %}
             <div class="form-group">
                 <label for="bank_code">Bank-Code (BLZ)</label>
                 <input class="form-control" id="bank_code" name="bank_code" required style="font-family:monospace;">
@@ -23,15 +26,17 @@
                     E.g. <span class="text-monospace">12030000</span>
                 </small>
             </div>
+	    {% endif %}
             <div class="form-group">
                 <label for="bank_username">Username</label>
-                <input class="form-control" id="bank_username" name="bank_username" required>
+                <input class="form-control" id="bank_username" name="bank_username" required value="{{ configuration.bank_username }}">
             </div>
             <div class="form-group">
                 <label for="bank_password">Password</label>
                 <input class="form-control" id="bank_password" name="bank_password" type="password" required>
                 <small class="form-text text-muted">This is NOT the PIN of your bank card!</small>
             </div>
+            {% if configuration.bank_2fa == "" %}
             <div class="form-group">
                 <label for="bank_sfa">Two-Factor Method</label>
                 <select class="form-control" id="bank_2fa" name="bank_2fa" required>
@@ -50,7 +55,9 @@
                 </select>
                 <small class="form-text text-muted">Choose an option that you know works for your bank.</small>
             </div>
+	    {% endif %}
         </fieldset>
+	{% if configuration.firefly_access_token == "" %}
         <fieldset class="mt-4">
             <legend>Firefly III Data</legend>
             <div class="form-group">
@@ -63,6 +70,10 @@
                           required></textarea>
             </div>
         </fieldset>
+	{% endif %}
+	{% if data_collect_mode != "" %}
+	 <input type="hidden" id="data_collect_mode" name="data_collect_mode" value="{{ data_collect_mode }}"> 
+	{% endif %}
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}
