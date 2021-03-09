@@ -11,17 +11,17 @@
 	    {% if configuration.bank_url == "" %}
             <div class="form-group">
                 <label for="bank_url">URL</label>
-                <input class="form-control" id="bank_url" name="bank_url" required style="font-family:monospace;" value="{{ configuration.bank_url }}">
+                <input class="form-control" id="bank_url" name="bank_url" required style="font-family:monospace;">
                 <small class="form-text text-muted">
                     URL to your banks FinTS api, e.g.
                     <span class="text-monospace">https://banking-dkb.s-fints-pt-dkb.de/fints30</span>
                 </small>
             </div>
 	    {% endif %}
-	    {% if configuration.bank_url == "" %}
+	    {% if configuration.bank_code == "" %}
             <div class="form-group">
                 <label for="bank_code">Bank-Code (BLZ)</label>
-                <input class="form-control" id="bank_code" name="bank_code" required style="font-family:monospace;" value="{{ configuration.bank_code }}">
+                <input class="form-control" id="bank_code" name="bank_code" required style="font-family:monospace;">
                 <small class="form-text text-muted">
                     E.g. <span class="text-monospace">12030000</span>
                 </small>
@@ -39,7 +39,7 @@
             {% if configuration.bank_2fa == "" %}
             <div class="form-group">
                 <label for="bank_sfa">Two-Factor Method</label>
-                <select class="form-control" id="bank_2fa" name="bank_2fa" required value="{{ configuration.bank_2fa }}">
+                <select class="form-control" id="bank_2fa" name="bank_2fa" required>
                     <option value="911">chipTAN optisch</option>
                     <option value="910">chipTAN manuell</option>
                     <option value="912">chipTAN-USB</option>
@@ -53,7 +53,7 @@
                     <option value="997">Sparda Secure App</option>
                     <option value="NoPsd2TanMode">None (for ING-DiBa)</option>
                 </select>
-                <small class="form-text text-muted">Choose an option that you know works for your bank. (Current selection: {{ configuration.bank_2fa }})</small>
+                <small class="form-text text-muted">Choose an option that you know works for your bank.</small>
             </div>
 	    {% endif %}
         </fieldset>
