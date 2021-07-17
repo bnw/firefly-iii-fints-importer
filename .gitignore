@@ -1,1 +1,4 @@
 vendor
+data
+!data/configurations/example.json
+.idea
