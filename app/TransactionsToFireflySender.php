@@ -72,6 +72,7 @@ class TransactionsToFireflySender
                     'destination_name' => $destination['name'] ?? null,
                     'destination_id' => $destination['id'] ?? null,
                     'destination_iban' => $destination['iban'] ?? null,
+                    'sepa_ct_id' => $transaction->getEndToEndID() ?? null,
                 )
             )
         );
