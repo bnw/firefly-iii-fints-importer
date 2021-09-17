@@ -12,7 +12,7 @@
             <select class="form-control" name="bank_account" id="bank_account" required>
                 {% for index, account in bank_accounts %}
                     <option value="{{ index }}">
-                        {{ account.getAccountNumber() }}
+                        {% if account.getIban() %}{{ account.getIban() }} &mdash; {% endif %} {{ account.getSubAccount() }}, {{ account.getAccountNumber() }}
                     </option>
                 {% endfor %}
             </select>
