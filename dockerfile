@@ -1,6 +1,6 @@
-FROM php:7.3-cli-alpine
+FROM php:8.0.13-cli-alpine 
 
-RUN apk add composer git
+RUN apk add composer git php8-bcmath php8-xml php8-xmlwriter php8-tokenizer php8-dom
 RUN docker-php-ext-install bcmath
 
 COPY . .
