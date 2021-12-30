@@ -158,7 +158,7 @@ switch ((string)$current_step) {
                 'skip-form.twig',
                 array(
                     'next_step' => Step::STEP3_CHOOSE_ACCOUNT,
-                    'message' => "The connection to both your bank and your Firefly III instance could be established."
+                    'message' => "The connection to your bank was tested sucessfully."
                 )
             );
         }
