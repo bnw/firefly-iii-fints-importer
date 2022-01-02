@@ -28,6 +28,8 @@ jobs:
         with:
           push: true
           tags: benkl/firefly-iii-fints-importer:latest
+          
+      - uses: actions/checkout@v2
       - name: Start image
         run: docker-compose up -d
       - run: docker-compose ps | grep -q app
