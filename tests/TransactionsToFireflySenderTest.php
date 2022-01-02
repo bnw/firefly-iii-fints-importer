@@ -44,6 +44,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'destination_name' => null,
                     'destination_id' => $this->firefly_account_id,
                     'destination_iban' => null,
+                    'sepa_ct_id' => '',
                 )
             )
         );
@@ -80,6 +81,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'destination_name' => 'destination_name',
                     'destination_id' => null,
                     'destination_iban' => $this->valid_iban,
+                    'sepa_ct_id' => '',
                 )
             )
         );
