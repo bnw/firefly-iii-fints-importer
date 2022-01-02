@@ -11,7 +11,7 @@ COPY . .
 
 RUN rm -f /data/configurations/*
 
-RUN php composer.phar install
+RUN php composer.phar install --no-dev
 
 EXPOSE 8080
 
