@@ -37,7 +37,8 @@ function Login()
             'skip-form.twig',
             array(
                 'next_step' => Step::STEP3_CHOOSE_ACCOUNT,
-                'message' => "The connection to your bank was tested sucessfully."
+                'message' => "The connection to your bank was tested sucessfully.",
+                'automate' => $session->get('automate')
             )
         );
     }

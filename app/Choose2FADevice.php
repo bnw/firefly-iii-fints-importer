@@ -19,6 +19,7 @@ function Choose2FADevice()
     $session->set('bank_2fa', $request->request->get('bank_2fa'));
     $session->set('firefly_url', $request->request->get('firefly_url'));
     $session->set('firefly_access_token', $request->request->get('firefly_access_token'));
+    $session->set('automate', $request->request->get('automate'));
     $fin_ts   = FinTsFactory::create_from_session($session);
     $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
 
@@ -34,7 +35,8 @@ function Choose2FADevice()
             'skip-form.twig',
             array(
                 'next_step' => Step::STEP2_LOGIN,
-                'message' => "Your chosen tan mode does not require you to choose a device."
+                'message' => "Your chosen tan mode does not require you to choose a device.",
+                'automate' => $session->get('automate')
             )
         );
     }

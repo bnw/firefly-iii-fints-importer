@@ -47,7 +47,8 @@ function GetImportData()
             'show-transactions.twig',
             array(
                 'transactions' => $transactions,
-                'next_step' => Step::STEP5_RUN_IMPORT
+                'next_step' => Step::STEP5_RUN_IMPORT,
+                'automate' => $session->get('firefly_url')
             )
         );
         $session->set('transactions_to_import', serialize($transactions));

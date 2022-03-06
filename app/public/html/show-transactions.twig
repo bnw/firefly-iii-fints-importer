@@ -7,7 +7,7 @@
     
     <p>The following transactions will be imported to Firefly III.</p>
 
-    <form action="." method="post">
+    <form name="next-form" action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">
         <button type="submit" class="btn btn-primary">Import transactions to FireflyIII</button>
     </form>
@@ -31,4 +31,12 @@
         </div>
     {% endfor %}
     </ul>
+
+    {% if automate %}
+        <script>
+            window.onload = function() {
+                document.forms["next-form"].submit();
+            }
+        </script>
+    {% endif %}
 {% endblock %}
