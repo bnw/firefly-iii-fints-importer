@@ -3,43 +3,77 @@
 {% block title %}Choose account {% endblock %}
 
 {% block content %}
-    <h1>Choose an account to import from and to</h1>
 
-    <form name="next-form" action="." method="post">
-        <input type="hidden" name="step" value="{{ next_step }}">
-        <div class="form-group">
-            <label for="bank_account">Bank Account</label>
-            <select class="form-control" name="bank_account" id="bank_account" required>
-                {% for index, account in bank_accounts %}
-                    <option value="{{ index }}">
-                        {% if account.getIban() %}{{ account.getIban() }} &mdash; {% endif %} {{ account.getSubAccount() }}, {{ account.getAccountNumber() }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="firefly_account">Firefly Account</label>
-            <select class="form-control" name="firefly_account" id="firefly_account" required>
-                {% for account in firefly_accounts %}
-                    <option value="{{ account.id }}">
-                        {% if account.iban %}{{ account.iban }} &mdash; {% endif %}
-                        {{ account.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
+    {% if bank_account_index == -1 or firefly_account_id == -1 %}
+        <h1>Choose an account to import from and to</h1>
 
-        <div class="form-group">
-            <label for="date_from">Import start date</label>
-            <input class="form-control" name="date_from" id="date_from" type="date" required
-                   value="{{ default_from_date | date('Y-m-d') }}">
-        </div>
-        <div class="form-group">
-            <label for="date_to">Import end date</label>
-            <input class="form-control" name="date_to" id="date_to" type="date" required
-                   value="{{ default_to_date | date('Y-m-d') }}">
-        </div>
+        <form name="next-form" action="." method="post">
+            <input type="hidden" name="step" value="{{ next_step }}">
+            <div class="form-group">
+                <label for="bank_account">Bank Account</label>
+                <select class="form-control" name="bank_account" id="bank_account" required>
+                    {% for index, account in bank_accounts %}
+                        <option value="{{ index }}">
+                            {% if account.getIban() %}{{ account.getIban() }} &mdash; {% endif %} {{ account.getSubAccount() }}, {{ account.getAccountNumber() }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="firefly_account">Firefly Account</label>
+                <select class="form-control" name="firefly_account" id="firefly_account" required>
+                    {% for account in firefly_accounts %}
+                        <option value="{{ account.id }}">
+                            {% if account.iban %}{{ account.iban }} &mdash; {% endif %}
+                            {{ account.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
-    </form>
+            <div class="form-group">
+                <label for="date_from">Import start date</label>
+                <input class="form-control" name="date_from" id="date_from" type="date" required
+                    value="{{ default_from_date | date('Y-m-d') }}">
+            </div>
+            <div class="form-group">
+                <label for="date_to">Import end date</label>
+                <input class="form-control" name="date_to" id="date_to" type="date" required
+                    value="{{ default_to_date | date('Y-m-d') }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
+        </form>
+    {% else %}
+        <h1>Importing from Bank Account IBAN {{bank_account_iban}} into Firefly Account ID {{firefly_account_id}}</h1> 
+
+        <p>Continuing to next step in 2 seconds.</p>
+
+        <form name="next-form" action="." method="post">
+            <input type="hidden" name="step" value="{{ next_step }}">
+            <input type="text" name="bank_account" id="bank_account" value="{{ bank_account_index }}" readonly>
+            <input type="text" name="firefly_account" id="firefly_account" value="{{ firefly_account_id }}" readonly>
+
+            <div class="form-group">
+                <label for="date_from">Import start date</label>
+                <input class="form-control" name="date_from" id="date_from" type="date" required
+                    value="{{ default_from_date | date('Y-m-d') }}">
+            </div>
+            <div class="form-group">
+                <label for="date_to">Import end date</label>
+                <input class="form-control" name="date_to" id="date_to" type="date" required
+                    value="{{ default_to_date | date('Y-m-d') }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
+        </form>
+
+        <script>
+            window.onload = function() {
+                setTimeout(function() {
+                    document.forms["next-form"].submit();
+                }, 2000);
+            }
+        </script>
+    {% endif %}
 {% endblock %}

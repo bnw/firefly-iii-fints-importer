@@ -7,6 +7,7 @@ use App\TanHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 
 function ChooseAccount()
 {
@@ -35,17 +36,63 @@ function ChooseAccount()
         $firefly_accounts_request = new GetAccountsRequest($session->get('firefly_url'), $session->get('firefly_access_token'));
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
         $firefly_accounts = $firefly_accounts_request->get();
-        echo $twig->render(
-            'choose-account.twig',
-            array(
-                'next_step' => Step::STEP4_GET_IMPORT_DATA,
-                'bank_accounts' => $bank_accounts,
-                'firefly_accounts' => $firefly_accounts,
-                'default_from_date' => new \DateTime('now - 1 month'),
-                'default_to_date' => new \DateTime('now')
-            )
-        );
-        $session->set('accounts', serialize($bank_accounts));
+
+        $requested_bank_index = -1;
+        $requested_bank_iban = $session->get('bank_account_iban');
+        $requested_firefly_id = $session->get('firefly_account_id');
+        $error = '';
+
+        if (!empty($requested_bank_iban)) {
+            for ($i = 0; $i < count($bank_accounts); $i++) {
+                if ($bank_accounts[$i]->getIban() == $requested_bank_iban) {
+                    $requested_bank_index = $i;
+                    break;
+                }
+            }
+            if ($requested_bank_index == -1) {
+                $error = $error . 'Could not find IBAN "' . $requested_bank_iban . '" in your bank accounts.' . "\n";
+                $error = $error . 'Please review your configuration.' . "\n";
+            }
+        }
+        if (!empty($requested_firefly_id)) {
+            $firefly_accounts->rewind();
+            for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
+                if ($acc->id == $requested_firefly_id) {
+                    break;
+                }
+                $firefly_accounts->next();
+            }
+            if (!$firefly_accounts->valid()) {
+                $error = $error . 'Could not find the Firefly ID "' . $requested_firefly_id . '" in your Firefly III account.' . "\n";
+                $error = $error . 'Please review your configuration.' . "\n";
+            }
+            $firefly_accounts->rewind();
+        }
+
+        if (empty($error)) {
+            echo $twig->render(
+                'choose-account.twig',
+                array(
+                    'next_step' => Step::STEP4_GET_IMPORT_DATA,
+                    'bank_accounts' => $bank_accounts,
+                    'firefly_accounts' => $firefly_accounts,
+                    'default_from_date' => new \DateTime('now - 1 month'),
+                    'default_to_date' => new \DateTime('now'),
+                    'bank_account_iban' => $requested_bank_iban,
+                    'bank_account_index' => $requested_bank_index,
+                    'firefly_account_id' => $requested_firefly_id
+                )
+            );
+            $session->set('accounts', serialize($bank_accounts));
+        } else {
+            echo $twig->render(
+                'error.twig',
+                array(
+                    'error_header' => 'Failed to verify given Information',
+                    'error_message' => $error
+                )
+            );
+        }
     }
     $session->set('persistedFints', $fin_ts->persist());
 }
