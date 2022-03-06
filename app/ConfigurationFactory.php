@@ -12,7 +12,7 @@ class Configuration {
     public $firefly_url;
     public $firefly_access_token;
     public $skip_transaction_review;
-    public $bank_account_id;
+    public $bank_account_iban;
     public $firefly_account_id;
 }
 
@@ -34,7 +34,7 @@ static function load_from_file($fileName)
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
         $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
-        $configuration->bank_account_id         = $contentArray["bank_account_id"];
+        $configuration->bank_account_iban       = $contentArray["bank_account_iban"];
         $configuration->firefly_account_id      = $contentArray["firefly_account_id"];
 
         return $configuration;
