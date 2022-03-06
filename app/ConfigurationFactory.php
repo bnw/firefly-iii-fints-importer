@@ -31,7 +31,9 @@ static function load_from_file($fileName)
         $configuration->bank_2fa                = $contentArray["bank_2fa"];
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
-        $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);;
+        $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
+        $configuration->bank_account_id         = $contentArray["bank_account_id"];
+        $configuration->firefly_account_id      = $contentArray["firefly_account_id"];
 
         return $configuration;
     }
