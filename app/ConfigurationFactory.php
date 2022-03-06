@@ -12,6 +12,8 @@ class Configuration {
     public $firefly_url;
     public $firefly_access_token;
     public $skip_transaction_review;
+    public $bank_account_id;
+    public $firefly_account_id;
 }
 
 class ConfigurationFactory
