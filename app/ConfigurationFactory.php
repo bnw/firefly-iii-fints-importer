@@ -11,6 +11,7 @@ class Configuration {
     public $bank_2fa;
     public $firefly_url;
     public $firefly_access_token;
+    public $automate;
 }
 
 class ConfigurationFactory
@@ -30,6 +31,7 @@ static function load_from_file($fileName)
         $configuration->bank_2fa             = $contentArray["bank_2fa"];
         $configuration->firefly_url          = $contentArray["firefly_url"];
         $configuration->firefly_access_token = $contentArray["firefly_access_token"];
+        $configuration->automate             = filter_var($contentArray["automate"], FILTER_VALIDATE_BOOLEAN);;
 
         return $configuration;
     }
