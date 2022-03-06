@@ -6,5 +6,5 @@
   "bank_2fa": "944",
   "firefly_url": "",
   "firefly_access_token": "",
-  "automate": "false"
+  "skip_transaction_review": "false"
 }

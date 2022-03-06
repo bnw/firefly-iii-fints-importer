@@ -48,7 +48,7 @@ function GetImportData()
             array(
                 'transactions' => $transactions,
                 'next_step' => Step::STEP5_RUN_IMPORT,
-                'automate' => $session->get('firefly_url')
+                'skip_transaction_review' => $session->get('skip_transaction_review')
             )
         );
         $session->set('transactions_to_import', serialize($transactions));

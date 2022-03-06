@@ -4,6 +4,18 @@
 
 {% block content %}
     <h1>Your transactions</h1>
+
+    {% if skip_transaction_review %}
+        <p>Continuing to next step in 2 seconds.</p>
+
+        <script>
+            window.onload = function() {
+                setTimeout(function() {
+                    document.forms["next-form"].submit();
+                }, 2000);
+            }
+        </script>
+    {% endif %}
     
     <p>The following transactions will be imported to Firefly III.</p>
 
@@ -31,12 +43,4 @@
         </div>
     {% endfor %}
     </ul>
-
-    {% if automate %}
-        <script>
-            window.onload = function() {
-                document.forms["next-form"].submit();
-            }
-        </script>
-    {% endif %}
 {% endblock %}

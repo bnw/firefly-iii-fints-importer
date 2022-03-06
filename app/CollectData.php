@@ -38,14 +38,14 @@ function CollectData()
             }
         }
 
-        $session->set('bank_username',        $configuration->bank_username);
-        $session->set('bank_password',        $configuration->bank_password);
-        $session->set('bank_url',             $configuration->bank_url);
-        $session->set('bank_code',            $configuration->bank_code);
-        $session->set('bank_2fa',             $configuration->bank_2fa);
-        $session->set('firefly_url',          $configuration->firefly_url);
-        $session->set('firefly_access_token', $configuration->firefly_access_token);
-        $session->set('automate',             $configuration->automate);
+        $session->set('bank_username',           $configuration->bank_username);
+        $session->set('bank_password',           $configuration->bank_password);
+        $session->set('bank_url',                $configuration->bank_url);
+        $session->set('bank_code',               $configuration->bank_code);
+        $session->set('bank_2fa',                $configuration->bank_2fa);
+        $session->set('firefly_url',             $configuration->firefly_url);
+        $session->set('firefly_access_token',    $configuration->firefly_access_token);
+        $session->set('skip_transaction_review', $configuration->skip_transaction_review);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);

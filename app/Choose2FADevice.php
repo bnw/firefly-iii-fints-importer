@@ -19,7 +19,7 @@ function Choose2FADevice()
     $session->set('bank_2fa', $request->request->get('bank_2fa'));
     $session->set('firefly_url', $request->request->get('firefly_url'));
     $session->set('firefly_access_token', $request->request->get('firefly_access_token'));
-    $session->set('automate', $request->request->get('automate'));
+    $session->set('skip_transaction_review', $request->request->get('skip_transaction_review'));
     $fin_ts   = FinTsFactory::create_from_session($session);
     $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
 

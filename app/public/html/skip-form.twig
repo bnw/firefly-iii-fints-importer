@@ -4,16 +4,8 @@
 
 {% block content %}
     <h1>Continue to next step</h1>
-    
-    <p>{{ message }}</p>
-
-    <form name="next-form" action="." method="post">
-        <input type="hidden" name="step" value="{{ next_step }}">
-        <button type="submit" class="btn btn-primary">Proceed</button>
-    </form>
 
     <p>Continuing to next step in 2 seconds.</p>
-
     <script>
         window.onload = function() {
             setTimeout(function() {
@@ -21,5 +13,11 @@
             }, 2000);
         }
     </script>
+    
+    <p>{{ message }}</p>
 
+    <form name="next-form" action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <button type="submit" class="btn btn-primary">Proceed</button>
+    </form>
 {% endblock %}
