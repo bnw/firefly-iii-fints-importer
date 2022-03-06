@@ -12,12 +12,14 @@
         <button type="submit" class="btn btn-primary">Proceed</button>
     </form>
 
-    {% if automate %}
-        <script>
-            window.onload = function() {
+    <p>Continuing to next step in 2 seconds.</p>
+
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
                 document.forms["next-form"].submit();
-            }
-        </script>
-    {% endif %}
+            }, 2000);
+        }
+    </script>
 
 {% endblock %}

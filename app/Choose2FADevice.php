@@ -35,8 +35,7 @@ function Choose2FADevice()
             'skip-form.twig',
             array(
                 'next_step' => Step::STEP2_LOGIN,
-                'message' => "Your chosen tan mode does not require you to choose a device.",
-                'automate' => $session->get('automate')
+                'message' => "Your chosen tan mode does not require you to choose a device."
             )
         );
     }
