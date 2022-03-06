@@ -7,17 +7,8 @@
     
     <p>{{ message }}</p>
 
-    <form name="next-form" action="." method="post">
+    <form action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">
         <button type="submit" class="btn btn-primary">Proceed</button>
     </form>
-
-    {% if automate %}
-        <script>
-            window.onload = function() {
-                document.forms["next-form"].submit();
-            }
-        </script>
-    {% endif %}
-
 {% endblock %}
