@@ -1,4 +1,4 @@
-FROM php:7.3-cli-alpine
+FROM php:7.4-cli-alpine
 
 RUN apk add git
 RUN docker-php-ext-install bcmath
