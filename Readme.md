@@ -37,10 +37,10 @@ Thanks to [joBr99](https://github.com/joBr99) for this feature!
 
 Requirements
 ------------
-* Docker **or** (PHP 7.3 or newer and [Composer](https://getcomposer.org/))
+* Docker **or** (PHP 8.1 or newer and [Composer](https://getcomposer.org/))
 * An already running instance of [Firefly III](https://www.firefly-iii.org/) 
   * It must be reachable over the network by PHP from the computer you run this import app
-  * A Personal Access Token which you can generate on the Profile page in Firefly III 
+  * A _Personal Access Token_ which you can generate on the Profile page in Firefly III 
   
   
 Feedback
