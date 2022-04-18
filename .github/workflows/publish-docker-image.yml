@@ -35,6 +35,6 @@ jobs:
         run: docker-compose up -d
       - run: docker-compose ps | grep -q app
       - run: curl localhost:8080
-      - run: docker-compose exec -T app php composer.phar install --dev
+      - run: docker-compose exec -T app composer install --dev
       - name: Run Tests
         run: docker-compose exec -T app ./vendor/bin/phpunit tests
