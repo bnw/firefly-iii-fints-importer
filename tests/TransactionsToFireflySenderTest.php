@@ -45,6 +45,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'destination_id' => $this->firefly_account_id,
                     'destination_iban' => null,
                     'sepa_ct_id' => '',
+                    'notes' => null,
                 )
             )
         );
@@ -64,7 +65,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         $transaction->setValutaDate(new DateTime('2020-06-01'));
         $transaction->setAmount(3.14);
         $transaction->setName('destination_name');
-        $transaction->setStructuredDescription(array('SVWZ' => 'description'));
+        $transaction->setStructuredDescription(array('SVWZ' => 'description', 'ABWA' => 'bakery'));
 
         $expected = array(
             'apply_rules' => true,
@@ -82,6 +83,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'destination_id' => null,
                     'destination_iban' => $this->valid_iban,
                     'sepa_ct_id' => '',
+                    'notes' => 'bakery',
                 )
             )
         );
