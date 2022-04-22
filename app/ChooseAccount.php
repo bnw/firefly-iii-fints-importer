@@ -42,7 +42,7 @@ function ChooseAccount()
         $requested_firefly_id = $session->get('firefly_account_id');
         $error = '';
 
-        if (!empty($requested_bank_iban)) {
+        if (!is_null($requested_bank_iban)) {
             for ($i = 0; $i < count($bank_accounts); $i++) {
                 if ($bank_accounts[$i]->getIban() == $requested_bank_iban) {
                     $requested_bank_index = $i;
@@ -54,7 +54,7 @@ function ChooseAccount()
                 $error = $error . 'Please review your configuration.' . "\n";
             }
         }
-        if (!empty($requested_firefly_id)) {
+        if (!is_null($requested_firefly_id)) {
             $firefly_accounts->rewind();
             for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
                 if ($acc->id == $requested_firefly_id) {
