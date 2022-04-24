@@ -6,5 +6,10 @@
   "bank_2fa": "944",
   "firefly_url": "",
   "firefly_access_token": "",
-  "skip_transaction_review": "false"
+  "skip_transaction_review": "false",
+  "choose_account_automation":
+  {
+    "bank_account_iban": "",
+    "firefly_account_id": ""
+  }
 }
