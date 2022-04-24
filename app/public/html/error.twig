@@ -1,0 +1,9 @@
+{% extends 'base.twig' %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+    <h1>{{ error_header }}</h1>
+
+    <p>{{ error_message|nl2br }}</p>
+{% endblock %}
