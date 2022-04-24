@@ -4,11 +4,27 @@
 
 {% block content %}
 
-    {% if bank_account_index == -1 or firefly_account_id == -1 %}
-        <h1>Choose an account to import from and to</h1>
+    
+    {% if automate %}
+        <h1>Continue to next step</h1>
 
-        <form name="next-form" action="." method="post">
-            <input type="hidden" name="step" value="{{ next_step }}">
+        <p>Continuing to next step in 2 seconds.</p>
+        
+        <script>
+            window.onload = function() {
+                setTimeout(function() {
+                    document.forms["next-form"].submit();
+                }, 2000);
+            }
+        </script>
+    {% else %}
+        <h1>Choose an account to import from and to</h1>
+    {% endif %}
+
+
+    <form name="next-form" action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        {% if bank_account_index == -1 or firefly_account_id == -1 %}
             <div class="form-group">
                 <label for="bank_account">Bank Account</label>
                 <select class="form-control" name="bank_account" id="bank_account" required>
@@ -31,49 +47,22 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="date_from">Import start date</label>
-                <input class="form-control" name="date_from" id="date_from" type="date" required
-                    value="{{ default_from_date | date('Y-m-d') }}">
-            </div>
-            <div class="form-group">
-                <label for="date_to">Import end date</label>
-                <input class="form-control" name="date_to" id="date_to" type="date" required
-                    value="{{ default_to_date | date('Y-m-d') }}">
-            </div>
+        {% else %}
+            <input type="hidden" name="bank_account" id="bank_account" value="{{ bank_account_index }}" readonly>
+            <input type="hidden" name="firefly_account" id="firefly_account" value="{{ firefly_account_id }}" readonly>
+        {% endif %}
 
-            <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
-        </form>
-    {% else %}
-        <h1>Importing from Bank Account IBAN {{bank_account_iban}} into Firefly Account ID {{firefly_account_id}}</h1> 
+        <div class="form-group">
+            <label for="date_from">Import start date</label>
+            <input class="form-control" name="date_from" id="date_from" type="date" required
+                value="{{ default_from_date | date('Y-m-d') }}">
+        </div>
+        <div class="form-group">
+            <label for="date_to">Import end date</label>
+            <input class="form-control" name="date_to" id="date_to" type="date" required
+                value="{{ default_to_date | date('Y-m-d') }}">
+        </div>
 
-        <p>Continuing to next step in 2 seconds.</p>
-
-        <form name="next-form" action="." method="post">
-            <input type="hidden" name="step" value="{{ next_step }}">
-            <input type="text" name="bank_account" id="bank_account" value="{{ bank_account_index }}" readonly>
-            <input type="text" name="firefly_account" id="firefly_account" value="{{ firefly_account_id }}" readonly>
-
-            <div class="form-group">
-                <label for="date_from">Import start date</label>
-                <input class="form-control" name="date_from" id="date_from" type="date" required
-                    value="{{ default_from_date | date('Y-m-d') }}">
-            </div>
-            <div class="form-group">
-                <label for="date_to">Import end date</label>
-                <input class="form-control" name="date_to" id="date_to" type="date" required
-                    value="{{ default_to_date | date('Y-m-d') }}">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
-        </form>
-
-        <script>
-            window.onload = function() {
-                setTimeout(function() {
-                    document.forms["next-form"].submit();
-                }, 2000);
-            }
-        </script>
-    {% endif %}
+        <button type="submit" class="btn btn-primary">Collect statements from your bank</button>
+    </form>
 {% endblock %}

@@ -10,6 +10,9 @@
   "choose_account_automation":
   {
     "bank_account_iban": "",
-    "firefly_account_id": ""
+    "firefly_account_id": "",
+    "from_to_comment": "The following values will be passed directly into DateTime",
+    "from": "now - 7 days",
+    "to": "now"
   }
 }

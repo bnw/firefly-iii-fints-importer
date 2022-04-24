@@ -14,6 +14,8 @@ class Configuration {
     public $skip_transaction_review;
     public $bank_account_iban;
     public $firefly_account_id;
+    public $choose_account_from;
+    public $choose_account_to;
 }
 
 class ConfigurationFactory
@@ -35,9 +37,13 @@ class ConfigurationFactory
         if (isset($contentArray["choose_account_automation"])) {
             $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"];
             $configuration->firefly_account_id      = $contentArray["choose_account_automation"]["firefly_account_id"];
+            $configuration->choose_account_from     = $contentArray["choose_account_automation"]["from"];
+            $configuration->choose_account_to       = $contentArray["choose_account_automation"]["to"];
         } else {
             $configuration->bank_account_iban = NULL;
             $configuration->firefly_account_id = NULL;
+            $configuration->choose_account_from = NULL;
+            $configuration->choose_account_to = NULL;
         }
 
         return $configuration;

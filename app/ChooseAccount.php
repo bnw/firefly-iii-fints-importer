@@ -69,6 +69,25 @@ function ChooseAccount()
             $firefly_accounts->rewind();
         }
 
+        $default_from_date = new \DateTime('now - 1 month');
+        $default_to_date = new \DateTime('now');
+
+        $automate = false;
+
+        if (!is_null($session->get('choose_account_from')) && !is_null($session->get('choose_account_to')))
+        {
+            $automate = true;
+        }
+        if (!is_null($session->get('choose_account_from')))
+        {
+            $default_from_date = new \DateTime($session->get('choose_account_from'));
+        }
+        if (!is_null($session->get('choose_account_to')))
+        {
+            $default_to_date = new \DateTime($session->get('choose_account_to'));
+        }
+
+
         if (empty($error)) {
             echo $twig->render(
                 'choose-account.twig',
@@ -76,11 +95,12 @@ function ChooseAccount()
                     'next_step' => Step::STEP4_GET_IMPORT_DATA,
                     'bank_accounts' => $bank_accounts,
                     'firefly_accounts' => $firefly_accounts,
-                    'default_from_date' => new \DateTime('now - 1 month'),
-                    'default_to_date' => new \DateTime('now'),
+                    'default_from_date' => $default_from_date,
+                    'default_to_date' => $default_to_date,
                     'bank_account_iban' => $requested_bank_iban,
                     'bank_account_index' => $requested_bank_index,
-                    'firefly_account_id' => $requested_firefly_id
+                    'firefly_account_id' => $requested_firefly_id,
+                    'automate' => $automate
                 )
             );
             $session->set('accounts', serialize($bank_accounts));
