@@ -11,7 +11,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 
 function ChooseAccount()
 {
-    global $request, $session, $twig, $fin_ts;
+    global $request, $session, $twig, $fin_ts, $automate_without_js;
 
     $fin_ts = FinTsFactory::create_from_session($session);
     $current_step  = new Step($request->request->get("step", Step::STEP0_SETUP));
@@ -89,6 +89,17 @@ function ChooseAccount()
 
 
         if (empty($error)) {
+            $session->set('accounts', serialize($bank_accounts));
+            if ($automate && $automate_without_js)
+            {
+                $request->request->set('bank_account', $requested_bank_index);
+                $request->request->set('firefly_account', $requested_firefly_id);
+                $request->request->set('date_from', $default_from_date->format('Y-m-d'));
+                $request->request->set('date_to', $default_to_date->format('Y-m-d'));
+
+                $session->set('persistedFints', $fin_ts->persist());
+                return Step::STEP4_GET_IMPORT_DATA;
+            }
             echo $twig->render(
                 'choose-account.twig',
                 array(
@@ -103,7 +114,6 @@ function ChooseAccount()
                     'auto_submit_form_via_js' => $auto_submit_form_via_js
                 )
             );
-            $session->set('accounts', serialize($bank_accounts));
         } else {
             echo $twig->render(
                 'error.twig',
@@ -115,4 +125,5 @@ function ChooseAccount()
         }
     }
     $session->set('persistedFints', $fin_ts->persist());
+    return Step::DONE;
 }

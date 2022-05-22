@@ -54,4 +54,5 @@ function RunImport()
             )
         );
     }
+    return Step::DONE;
 }

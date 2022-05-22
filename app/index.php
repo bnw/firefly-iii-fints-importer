@@ -26,6 +26,7 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/public/html');
 $twig   = new \Twig\Environment($loader);
+$automate_without_js = false;
 
 $request = Request::createFromGlobals();
 
@@ -34,38 +35,45 @@ $current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
 $session = new Session();
 $session->start();
 
-
-
-switch ((string)$current_step) {
-    case Step::STEP0_SETUP:
-        StepFunction\Setup();
-        break;
-
-    case Step::STEP1_COLLECTING_DATA:
-        StepFunction\CollectData();
-        break;
-
-    case Step::STEP1p5_CHOOSE_2FA_DEVICE:
-        StepFunction\Choose2FADevice();
-        break;
-
-    case Step::STEP2_LOGIN:
-        StepFunction\Login();
-        break;
-
-    case Step::STEP3_CHOOSE_ACCOUNT:
-        StepFunction\ChooseAccount();
-        break;
-
-    case Step::STEP4_GET_IMPORT_DATA:
-        StepFunction\GetImportData();
-        break;
-
-    case Step::STEP5_RUN_IMPORT:
-        StepFunction\RunImport();
-        break;
-
-    default:
-        echo "Unknown step $current_step";
-        break;
+if (isset($_GET['automate'])) {
+    $automate_without_js = $_GET['automate'] == "true";
 }
+
+
+do
+{
+    switch ((string)$current_step) {
+        case Step::STEP0_SETUP:
+            $current_step = StepFunction\Setup();
+            break;
+
+        case Step::STEP1_COLLECTING_DATA:
+            $current_step = StepFunction\CollectData();
+            break;
+
+        case Step::STEP1p5_CHOOSE_2FA_DEVICE:
+            $current_step = StepFunction\Choose2FADevice();
+            break;
+
+        case Step::STEP2_LOGIN:
+            $current_step = StepFunction\Login();
+            break;
+
+        case Step::STEP3_CHOOSE_ACCOUNT:
+            $current_step = StepFunction\ChooseAccount();
+            break;
+
+        case Step::STEP4_GET_IMPORT_DATA:
+            $current_step = StepFunction\GetImportData();
+            break;
+
+        case Step::STEP5_RUN_IMPORT:
+            $current_step = StepFunction\RunImport();
+            break;
+
+        default:
+            echo "Unknown step $current_step";
+            $current_step = Step::DONE;
+            break;
+    }
+} while ($current_step != Step::DONE);

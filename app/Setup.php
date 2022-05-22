@@ -5,7 +5,7 @@ use App\Step;
 
 function Setup()
 {
-    global $twig;
+    global $twig, $automate_without_js, $request;
 
     $requested_config_file = '';
 
@@ -21,6 +21,12 @@ function Setup()
                 )
             );
             return;
+        }
+
+        if ($automate_without_js)
+        {
+            $request->request->set('data_collect_mode', $requested_config_file);
+            return Step::STEP1_COLLECTING_DATA;
         }
     }
 
@@ -38,5 +44,7 @@ function Setup()
             'files' => $configuration_files,
             'requested_config_file' => $requested_config_file,
             'next_step' => Step::STEP1_COLLECTING_DATA
-        ));
+    ));
+    
+    return Step::DONE;
 }

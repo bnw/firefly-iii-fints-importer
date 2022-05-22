@@ -56,4 +56,5 @@ function GetImportData()
         $session->set('import_messages', serialize(array()));
     }
     $session->set('persistedFints', $fin_ts->persist());
+    return Step::DONE;
 }
