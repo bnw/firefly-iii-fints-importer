@@ -12,7 +12,7 @@ include 'Choose2FADevice.php';
 include 'Login.php';
 include 'ChooseAccount.php';
 include 'GetImportData.php';
-include 'RunImport.php';
+include 'RunImportBatched.php';
 
 use App\StepFunction;
 use App\FinTsFactory;
@@ -67,8 +67,8 @@ do
             $current_step = StepFunction\GetImportData();
             break;
 
-        case Step::STEP5_RUN_IMPORT:
-            $current_step = StepFunction\RunImport();
+        case Step::STEP5_RUN_IMPORT_BATCHED:
+            $current_step = StepFunction\RunImportBatched();
             break;
 
         default:

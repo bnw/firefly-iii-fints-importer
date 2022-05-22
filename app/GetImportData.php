@@ -47,7 +47,7 @@ function GetImportData()
             'show-transactions.twig',
             array(
                 'transactions' => $transactions,
-                'next_step' => Step::STEP5_RUN_IMPORT,
+                'next_step' => Step::STEP5_RUN_IMPORT_BATCHED,
                 'skip_transaction_review' => $session->get('skip_transaction_review')
             )
         );
