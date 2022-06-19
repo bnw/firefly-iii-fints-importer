@@ -46,6 +46,10 @@ function CollectData()
         $session->set('firefly_url',             $configuration->firefly_url);
         $session->set('firefly_access_token',    $configuration->firefly_access_token);
         $session->set('skip_transaction_review', $configuration->skip_transaction_review);
+        $session->set('bank_account_iban' ,      $configuration->bank_account_iban);
+        $session->set('firefly_account_id',      $configuration->firefly_account_id);
+        $session->set('choose_account_from' ,    $configuration->choose_account_from);
+        $session->set('choose_account_to',       $configuration->choose_account_to);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);

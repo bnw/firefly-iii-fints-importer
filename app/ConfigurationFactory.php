@@ -12,13 +12,15 @@ class Configuration {
     public $firefly_url;
     public $firefly_access_token;
     public $skip_transaction_review;
+    public $bank_account_iban;
+    public $firefly_account_id;
+    public $choose_account_from;
+    public $choose_account_to;
 }
 
 class ConfigurationFactory
 {
-
-
-static function load_from_file($fileName)
+    static function load_from_file($fileName)
     {
         $jsonFileContent = file_get_contents($fileName);
         $contentArray = json_decode($jsonFileContent, true);
@@ -31,9 +33,19 @@ static function load_from_file($fileName)
         $configuration->bank_2fa                = $contentArray["bank_2fa"];
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
-        $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);;
+        $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
+        if (isset($contentArray["choose_account_automation"])) {
+            $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"];
+            $configuration->firefly_account_id      = $contentArray["choose_account_automation"]["firefly_account_id"];
+            $configuration->choose_account_from     = $contentArray["choose_account_automation"]["from"];
+            $configuration->choose_account_to       = $contentArray["choose_account_automation"]["to"];
+        } else {
+            $configuration->bank_account_iban = NULL;
+            $configuration->firefly_account_id = NULL;
+            $configuration->choose_account_from = NULL;
+            $configuration->choose_account_to = NULL;
+        }
 
         return $configuration;
     }
-
 }
