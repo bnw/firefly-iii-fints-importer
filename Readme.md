@@ -15,14 +15,15 @@ To start the app, choose one of the three methods below:
   php -S 0.0.0.0:8080 app/index.php
   ```
 
-* Alternatively, you can use docker-compose. The following will build the image locally and should work on any architecture (amd64, arm, ...).
+* Alternatively, you can use docker-compose. The following commands will download and start the [pre-built image from docker-hub](https://hub.docker.com/r/benkl/firefly-iii-fints-importer). 
   ```
   git clone https://github.com/bnw/firefly-iii-fints-importer.git
   cd firefly-iii-fints-importer
   docker-compose up
   ```
+  To update the docker image stored on your machine to the latest version, run `docker-compose pull && docker-compose up`.
 
-* For amd64 machines, https://hub.docker.com/r/benkl/firefly-iii-fints-importer provides prebuild images. Simply follow the above steps for docker-compose, but replace the line `build: .` by `image: benkl/firefly-iii-fints-importer` in the [`docker-compose.yml`](docker-compose.yml). This saves you a few minutes of build time.
+* You can also build the docker image locally. To do so, simply follow the above steps for docker-compose, but replace the line `image: benkl/firefly-iii-fints-importer` by `build: .` in the [`docker-compose.yml`](docker-compose.yml). The build usually takes a few minutes.
 
 After completing one of the above steps, browse to http://localhost:8080 and follow the instructions 🙂
 
