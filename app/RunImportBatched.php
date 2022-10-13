@@ -36,7 +36,7 @@ function RunImportStep($transactions, $start_index)
     return array($result, count($transactions_to_process_now));
 }
 
-function RunImportBatched()
+function RunImportWithJS()
 {
     global $session, $twig, $num_transactions_to_import_at_once;
 
@@ -74,4 +74,47 @@ function RunImportBatched()
         );
     }
     return Step::DONE;
+}
+
+function RunImportWithoutJS()
+{
+    global $session, $twig;
+
+    assert($session->has('transactions_to_import'));
+    assert($session->has('firefly_account'));
+    $transactions = unserialize($session->get('transactions_to_import'));
+
+    if (empty($transactions)) {
+        $import_messages = ['No transactions to import.'];
+    } else {
+        $import_messages = [];
+        $num_transactions_processed = 0;
+        
+        while ($num_transactions_processed < count($transactions))
+        {
+            list($result,$transaction_processed_step_count) = RunImportStep($transactions, $num_transactions_processed);
+            $num_transactions_processed += $transaction_processed_step_count;
+            $import_messages = array_merge($import_messages, $result);
+        }
+    }
+    echo $twig->render(
+        'done.twig',
+        array(
+            'import_messages' => $import_messages,
+            'total_num_transactions' => count($transactions)
+        )
+    );
+    $session->invalidate();
+    return Step::DONE;
+}
+
+function RunImportBatched()
+{
+    global $automate_without_js;
+
+    if ($automate_without_js) {
+        return RunImportWithoutJS();
+    } else {
+        return RunImportWithJS();
+    }
 }

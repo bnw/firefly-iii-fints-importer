@@ -72,11 +72,11 @@ function ChooseAccount()
         $default_from_date = new \DateTime('now - 1 month');
         $default_to_date = new \DateTime('now');
 
-        $auto_submit_form_via_js = false;
+        $can_be_automated = false;
 
         if (!is_null($session->get('choose_account_from')) && !is_null($session->get('choose_account_to')))
         {
-            $auto_submit_form_via_js = true;
+            $can_be_automated = true;
         }
         if (!is_null($session->get('choose_account_from')))
         {
@@ -90,7 +90,7 @@ function ChooseAccount()
 
         if (empty($error)) {
             $session->set('accounts', serialize($bank_accounts));
-            if ($automate && $automate_without_js)
+            if ($can_be_automated && $automate_without_js)
             {
                 $request->request->set('bank_account', $requested_bank_index);
                 $request->request->set('firefly_account', $requested_firefly_id);
@@ -111,7 +111,7 @@ function ChooseAccount()
                     'bank_account_iban' => $requested_bank_iban,
                     'bank_account_index' => $requested_bank_index,
                     'firefly_account_id' => $requested_firefly_id,
-                    'auto_submit_form_via_js' => $auto_submit_form_via_js
+                    'auto_submit_form_via_js' => $can_be_automated
                 )
             );
         } else {
