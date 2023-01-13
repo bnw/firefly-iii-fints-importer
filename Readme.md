@@ -3,6 +3,8 @@
 This tool allows you to import transactions from your [FinTS enabled bank](https://subsembly.com/banken.html) into [Firefly III](https://www.firefly-iii.org/).  
 It comes with a web GUI that guides you through the process.
 
+
+
 Startup
 -------
 To start the app, choose one of the three methods below:
@@ -26,6 +28,13 @@ To start the app, choose one of the three methods below:
 * You can also build the docker image locally. To do so, simply follow the above steps for docker-compose, but replace the line `image: benkl/firefly-iii-fints-importer` by `build: .` in the [`docker-compose.yml`](docker-compose.yml). The build usually takes a few minutes.
 
 After completing one of the above steps, browse to http://localhost:8080 and follow the instructions 🙂
+
+
+Tips
+-----
+* Banks typically only allow you to access the last two years worth of transactions.
+  In order to ensure that your bank account shows the correct balance in Firefly III, even if not all of it's history can be imported, adjust the account's starting balance accordingly in Firefly III.
+
 
 Storing configurations
 ----------------------
