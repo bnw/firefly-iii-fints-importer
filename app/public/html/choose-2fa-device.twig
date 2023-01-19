@@ -3,8 +3,23 @@
 {% block title %}Choose Tan Device{% endblock %}
 
 {% block content %}
-    <h1>Choose a device for your tan method.</h1>
 
+    {% if automate %}
+        <h1>Continue to next step</h1>
+
+        <p>Continuing to next step in 2 seconds.</p>
+        
+        <script>
+            window.onload = function() {
+                setTimeout(function() {
+                    document.forms["next-form"].submit();
+                }, 2000);
+            }
+        </script>
+    {% else %}
+        <h1>Choose a device for your tan method.</h1>
+    {% endif %}
+    
     <form action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">
         <div class="form-group">
