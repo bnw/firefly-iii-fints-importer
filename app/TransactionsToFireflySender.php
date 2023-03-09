@@ -17,12 +17,15 @@ class TransactionsToFireflySender
      * @param $firefly_access_token string
      * @param int $firefly_account_id
      */
-    public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, int $firefly_account_id)
+    public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, 
+                                int $firefly_account_id, string $regex_match, string $regex_replace)
     {
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
         $this->firefly_access_token = $firefly_access_token;
         $this->firefly_account_id   = $firefly_account_id;
+        $this->regex_match          = $regex_match;
+        $this->regex_replace        = $regex_replace;
     }
 
     public static function get_iban(Transaction $transaction)
@@ -55,6 +58,10 @@ class TransactionsToFireflySender
         $description = $transaction->getMainDescription();
         if ($description == "") {
             $description = $transaction->getBookingText();
+        }
+
+        if($this->regex_match !== "" && $this->regex_replace !== "") {
+            $description = preg_replace($this->regex_match, $this->regex_replace, $description);
         }
 
         return array(
@@ -108,4 +115,6 @@ class TransactionsToFireflySender
     private $firefly_url;
     private $firefly_access_token;
     private $firefly_account_id;
+    private $regex_match;
+    private $regex_replace;
 }

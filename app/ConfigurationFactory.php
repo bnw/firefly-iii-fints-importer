@@ -16,6 +16,8 @@ class Configuration {
     public $firefly_account_id;
     public $choose_account_from;
     public $choose_account_to;
+    public $description_regex_match;
+    public $description_regex_replace;
 }
 
 class ConfigurationFactory
@@ -45,6 +47,8 @@ class ConfigurationFactory
             $configuration->choose_account_from = NULL;
             $configuration->choose_account_to = NULL;
         }
+        $configuration->description_regex_match   = $contentArray["description_regex_match"];
+        $configuration->description_regex_replace = $contentArray["description_regex_replace"];
 
         return $configuration;
     }
