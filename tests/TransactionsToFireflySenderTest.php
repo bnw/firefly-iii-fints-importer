@@ -51,7 +51,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id
+            $this->firefly_account_id, "", ""
         );
 
         $this->assertEquals($expected, $actual);
@@ -89,7 +89,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id
+            $this->firefly_account_id, "", ""
         );
 
         $this->assertEquals($expected, $actual);
