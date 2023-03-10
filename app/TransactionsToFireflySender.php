@@ -40,7 +40,8 @@ class TransactionsToFireflySender
 
     public static function transform_transaction_to_firefly_request_body(
         Transaction $transaction,
-        int $firefly_account_id
+        int $firefly_account_id,
+        string $regex_match, string $regex_replace
     )
     {
         $debitOrCredit = $transaction->getCreditDebit();
@@ -60,8 +61,8 @@ class TransactionsToFireflySender
             $description = $transaction->getBookingText();
         }
 
-        if($this->regex_match !== "" && $this->regex_replace !== "") {
-            $description = preg_replace($this->regex_match, $this->regex_replace, $description);
+        if($regex_match !== "" && $regex_replace !== "") {
+            $description = preg_replace($regex_match, $regex_replace, $description);
         }
 
         return array(
@@ -93,7 +94,7 @@ class TransactionsToFireflySender
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
             $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id)
+                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->regex_match, $this->regex_replace)
             );
 
             $response = $request->post();
