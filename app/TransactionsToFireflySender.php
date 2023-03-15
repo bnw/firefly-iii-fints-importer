@@ -65,6 +65,10 @@ class TransactionsToFireflySender
             $description = preg_replace($regex_match, $regex_replace, $description);
         }
 
+        if($description == null) {
+            throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
+        }
+
         return array(
             'apply_rules' => true,
             'error_if_duplicate_hash' => true,

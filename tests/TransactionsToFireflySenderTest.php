@@ -142,4 +142,26 @@ final class TransactionsToFireflySenderTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function test_transaction_processing_debit_incorrect_regex()
+    {
+        $transaction = new Transaction;
+        $transaction->setAccountNumber($this->valid_iban);
+        $transaction->setCreditDebit(Transaction::CD_DEBIT);
+        $transaction->setValutaDate(new DateTime('2020-06-01'));
+        $transaction->setAmount(3.14);
+        $transaction->setName('destination_name');
+        $transaction->setStructuredDescription(array('SVWZ' => 'LASTSCHRIFT / BELASTUNGExample StoreKARTE 000000000KDN-REF 000000Ref. XXXX/0000', 'ABWA' => 'bakery'));
+
+        $regex_match = '/^(Übertrag \/ Überweisung|Lastschrift \/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\..*)$'; // not a valid PHP regex, missing / at the end
+        $regex_replace = '$2 [$1 | $3 | $4]';
+
+        set_error_handler(function() { /* ignore errors */ }); // required to suppress E_WARNING from preg_replace and test for an exception being thrown
+        $this->expectException(Exception::class);
+        $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
+            $transaction,
+            $this->firefly_account_id, $regex_match, $regex_replace
+        );
+        restore_error_handler();
+    }
+
 }
