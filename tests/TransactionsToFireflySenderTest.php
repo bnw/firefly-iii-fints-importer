@@ -1,5 +1,6 @@
 <?php
 
+use App\Configuration;
 use App\ConfigurationFactory;
 use App\TransactionsToFireflySender;
 use Fhp\Model\StatementOfAccount\Transaction;
@@ -106,14 +107,20 @@ final class TransactionsToFireflySenderTest extends TestCase
         $transaction->setName('destination_name');
         $transaction->setStructuredDescription(array('SVWZ' => 'LASTSCHRIFT / BELASTUNGExample StoreKARTE 000000000KDN-REF 000000Ref. XXXX/0000', 'ABWA' => 'bakery'));
 
-        $configuration = ConfigurationFactory::load_from_file('data/configurations/example.json');
-
         $exp_regex_match = '/^(Übertrag \/ Überweisung|Lastschrift \/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\..*)$/mi';
         $exp_regex_replace = '$2 [$1 | $3 | $4]';
 
+        // Test that loading the values from the config file works.
+        $config_file_name = "test_example.json";
+        file_put_contents($config_file_name, json_encode(array(
+            "description_regex_match" => $exp_regex_match,
+            "description_regex_replace" => $exp_regex_replace
+        )));
+        $configuration = @ConfigurationFactory::load_from_file($config_file_name);
         $this->assertEquals($exp_regex_match, $configuration->description_regex_match);
         $this->assertEquals($exp_regex_replace, $configuration->description_regex_replace);
 
+        // Test that transform_transaction_to_firefly_request_body applies the regex
         $expected = array(
             'apply_rules' => true,
             'error_if_duplicate_hash' => true,
