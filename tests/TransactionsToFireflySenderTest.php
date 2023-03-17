@@ -23,11 +23,11 @@ final class TransactionsToFireflySenderTest extends TestCase
             0 => array(
                 'id'            => 3,
                 'attributes' => array(
-                    'name'          => 'test',
+                    'name'          => 'wallet',
                     'type'          => 'asset',
-                    'iban'          => 'NL21INGB6487526967',
-                    'account_number'=> '123456789',
-                    'bic'           => 'BIC123',
+                    'iban'          => null,
+                    'account_number'=> null,
+                    'bic'           => null,
                     'currency_code' => 'EUR',
             )),
             1 => array(
