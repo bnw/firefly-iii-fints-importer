@@ -59,7 +59,7 @@ class TransactionsToFireflySender
 
         $firefly_accounts->rewind();
         for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
-            if ($acc->iban == $destination['iban']) {
+            if ($destination['iban'] !== null && $acc->iban == $destination['iban']) {
                 break;
             }
             $firefly_accounts->next();
