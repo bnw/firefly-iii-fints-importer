@@ -82,6 +82,26 @@
             </div>
         </fieldset>
 	{% endif %}
+    {% if configuration.description_regex_match == "" %}
+        <fieldset class="mt-4">
+            <legend>Regular Expression for Description Manipulation</legend>
+            <div class="form-group">
+                <label for="description_regex_match">Match RegEx</label>
+                <input class="form-control" id="description_regex_match" name="description_regex_match">
+                <small class="form-text text-muted">
+                    If the transaction description matches this RegEx, then it should be replaced by the next one.<br>
+                    Any valid <a href="https://www.php.net/manual/en/reference.pcre.pattern.syntax.php">PHP regex</a> will work.
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="description_regex_replace">Replace RegEx</label>
+                <input class="form-control" id="description_regex_replace" name="description_regex_replace">
+                <small class="form-text text-muted">
+                    You probably want to use <a href="https://www.php.net/manual/en/regexp.reference.back-references.php">back references</a> here.
+                </small>
+            </div>
+        </fieldset>
+	{% endif %}
 	{% if data_collect_mode != "" %}
 	 <input type="hidden" id="data_collect_mode" name="data_collect_mode" value="{{ data_collect_mode }}"> 
 	{% endif %}
