@@ -7,6 +7,8 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionType;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTransactionResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
+use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 class TransactionsToFireflySender
 {
@@ -18,14 +20,19 @@ class TransactionsToFireflySender
      * @param int $firefly_account_id
      */
     public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, 
-                                int $firefly_account_id, string $regex_match, string $regex_replace)
+                                int $firefly_account_id,
+                                string $regex_match, string $regex_replace)
     {
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
         $this->firefly_access_token = $firefly_access_token;
-        $this->firefly_account_id   = $firefly_account_id;
+        $this->firefly_account_id   = $firefly_account_id;      
         $this->regex_match          = $regex_match;
         $this->regex_replace        = $regex_replace;
+
+        $firefly_accounts_request = new GetAccountsRequest($this->firefly_url, $this->firefly_access_token);
+        $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
+        $this->firefly_accounts = $firefly_accounts_request->get();
     }
 
     public static function get_iban(Transaction $transaction)
@@ -41,6 +48,7 @@ class TransactionsToFireflySender
     public static function transform_transaction_to_firefly_request_body(
         Transaction $transaction,
         int $firefly_account_id,
+        GetAccountsResponse $firefly_accounts,
         string $regex_match, string $regex_replace
     )
     {
@@ -49,12 +57,31 @@ class TransactionsToFireflySender
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
 
-        if ($debitOrCredit !== Transaction::CD_CREDIT) {
-            $type = TransactionType::WITHDRAWAL;
-        } else {
-            $type = TransactionType::DEPOSIT;
-            [$source, $destination] = [$destination, $source];
+        $firefly_accounts->rewind();
+        for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
+            if ($acc->iban == $destination['iban']) {
+                break;
+            }
+            $firefly_accounts->next();
         }
+        if ($firefly_accounts->valid()) {
+            //echo "found account {$acc->name} with id {$acc->id} matching IBAN {$acc->iban}\n";
+            $destination = array('id' => $acc->id);
+            $type = TransactionType::TRANSFER;
+
+            if ($debitOrCredit !== Transaction::CD_DEBIT) {
+                [$source, $destination] = [$destination, $source];
+            }
+        } else {
+            //echo "no account found matching IBAN {$destination['iban']}\n";
+            if ($debitOrCredit !== Transaction::CD_CREDIT) {
+                $type = TransactionType::WITHDRAWAL;
+            } else {
+                $type = TransactionType::DEPOSIT;
+                [$source, $destination] = [$destination, $source];
+            }
+        }
+        $firefly_accounts->rewind();
 
         $description = $transaction->getMainDescription();
         if ($description == "") {
@@ -98,7 +125,7 @@ class TransactionsToFireflySender
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
             $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->regex_match, $this->regex_replace)
+                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
             );
 
             $response = $request->post();
@@ -120,6 +147,7 @@ class TransactionsToFireflySender
     private $firefly_url;
     private $firefly_access_token;
     private $firefly_account_id;
+    private $firefly_accounts;
     private $regex_match;
     private $regex_replace;
 }
