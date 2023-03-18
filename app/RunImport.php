@@ -33,7 +33,9 @@ function RunImport()
             $transactions_to_process_now,
             $session->get('firefly_url'),
             $session->get('firefly_access_token'),
-            $session->get('firefly_account')
+            $session->get('firefly_account'),
+            $session->get('description_regex_match'),
+            $session->get('description_regex_replace')
         );
         $result                     = $sender->send_transactions();
         if (is_array($result)) {

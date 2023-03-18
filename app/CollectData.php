@@ -50,6 +50,8 @@ function CollectData()
         $session->set('firefly_account_id',      $configuration->firefly_account_id);
         $session->set('choose_account_from' ,    $configuration->choose_account_from);
         $session->set('choose_account_to',       $configuration->choose_account_to);
+        $session->set('description_regex_match', $configuration->description_regex_match);
+        $session->set('description_regex_replace', $configuration->description_regex_replace);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
