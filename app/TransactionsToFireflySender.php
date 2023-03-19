@@ -26,7 +26,7 @@ class TransactionsToFireflySender
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
         $this->firefly_access_token = $firefly_access_token;
-        $this->firefly_account_id   = $firefly_account_id;      
+        $this->firefly_account_id   = $firefly_account_id;
         $this->regex_match          = $regex_match;
         $this->regex_replace        = $regex_replace;
 
