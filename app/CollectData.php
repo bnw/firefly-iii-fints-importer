@@ -57,11 +57,18 @@ function CollectData()
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
 
         if ($tan_mode->needsTanMedium()) {
+            $tan_devices = $fin_ts->getTanMedia($tan_mode);
+            if (count($tan_devices) == 1) {
+                $automate = true;
+            } else {
+                $automate = false;
+            }
             echo $twig->render(
                 'choose-2fa-device.twig',
                 array(
                     'next_step' => Step::STEP2_LOGIN,
-                    'devices' => $fin_ts->getTanMedia($tan_mode)
+                    'devices' => $fin_ts->getTanMedia($tan_mode),
+                    'automate' => $automate
                 ));
         } else {
             echo $twig->render(
