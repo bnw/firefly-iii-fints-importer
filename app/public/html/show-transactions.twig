@@ -8,6 +8,7 @@
     <h1>Your transactions</h1>
 
     {% if skip_transaction_review %}
+        <p>Automatic skipping of the transaction review was requested in the configuration file.</p>
         {{ macros.skip_form() }}
     {% endif %}
     

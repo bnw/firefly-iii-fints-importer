@@ -2,22 +2,15 @@
 
 {% block title %}Choose Tan Device{% endblock %}
 
+{% import 'macros.twig' as macros %}
+
 {% block content %}
+    <h1>Choose a device for your tan method.</h1>
 
-    {% if automate %}
-        <h1>Continue to next step</h1>
+    {% if auto_skip_form %}
+        <p>There is only one tan device available.</p>
 
-        <p>Continuing to next step in 2 seconds.</p>
-        
-        <script>
-            window.onload = function() {
-                setTimeout(function() {
-                    document.forms["next-form"].submit();
-                }, 2000);
-            }
-        </script>
-    {% else %}
-        <h1>Choose a device for your tan method.</h1>
+        {{ macros.skip_form() }}
     {% endif %}
     
     <form name="next-form" action="." method="post">

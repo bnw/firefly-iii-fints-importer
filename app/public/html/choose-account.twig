@@ -5,14 +5,12 @@
 {% block title %}Choose account {% endblock %}
 
 {% block content %}
-
+    <h1>Choose an account to import from and to</h1>
     
     {% if automate %}
-        <h1>Continue to next step</h1>
+        <p>All account data and the date range have been set in the configuration file.</p>
 
         {{ macros.skip_form() }}
-    {% else %}
-        <h1>Choose an account to import from and to</h1>
     {% endif %}
 
 

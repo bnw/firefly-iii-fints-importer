@@ -59,16 +59,16 @@ function CollectData()
         if ($tan_mode->needsTanMedium()) {
             $tan_devices = $fin_ts->getTanMedia($tan_mode);
             if (count($tan_devices) == 1) {
-                $automate = true;
+                $auto_skip_form = true;
             } else {
-                $automate = false;
+                $auto_skip_form = false;
             }
             echo $twig->render(
                 'choose-2fa-device.twig',
                 array(
                     'next_step' => Step::STEP2_LOGIN,
                     'devices' => $fin_ts->getTanMedia($tan_mode),
-                    'automate' => $automate
+                    'auto_skip_form' => $auto_skip_form
                 ));
         } else {
             echo $twig->render(
