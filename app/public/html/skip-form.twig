@@ -1,18 +1,13 @@
 {% extends 'base.twig' %}
 
+{% import 'macros.twig' as macros %}
+
 {% block title %}Continue to next step{% endblock %}
 
 {% block content %}
     <h1>Continue to next step</h1>
 
-    <p>Continuing to next step in 2 seconds.</p>
-    <script>
-        window.onload = function() {
-            setTimeout(function() {
-                document.forms["next-form"].submit();
-            }, 2000);
-        }
-    </script>
+    {{ macros.skip_form() }}
     
     <p>{{ message }}</p>
 

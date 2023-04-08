@@ -1,5 +1,7 @@
 {% extends 'base.twig' %}
 
+{% import 'macros.twig' as macros %}
+
 {% block title %}Enter account data{% endblock %}
 
 {% block content %}
@@ -9,15 +11,7 @@
     {% else %}
         <h1>Continue to next step</h1>
 
-        <p>Continuing to next step in 2 seconds.</p>
-        
-        <script>
-            window.onload = function() {
-                setTimeout(function() {
-                    document.forms["next-form"].submit();
-                }, 2000);
-            }
-        </script>
+        {{ macros.skip_form() }}
     {% endif %}
 
     <form name="next-form" action="." method="post">
