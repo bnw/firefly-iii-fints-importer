@@ -125,9 +125,9 @@ function getDateTime(string $date, int $firefly_account_id)
         
         $firefly_transactions_helper = new TransactionsHelper($session->get('firefly_url'), $session->get('firefly_access_token'), $firefly_account_id);
         $last_transaction = $firefly_transactions_helper->get_last_transaction();
-        return new \DateTime($last_transaction->date);
-    } else {
-        return new \DateTime($date);
+        if (!is_null($last_transaction)) {
+            $date = $last_transaction->date;
+        }
     }
-    
+    return new \DateTime($date);   
 }
