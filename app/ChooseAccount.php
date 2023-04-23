@@ -4,6 +4,7 @@ namespace App\StepFunction;
 use App\FinTsFactory;
 use App\Step;
 use App\TanHandler;
+use App\TransactionsHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -80,11 +81,11 @@ function ChooseAccount()
         }
         if (!is_null($session->get('choose_account_from')))
         {
-            $default_from_date = new \DateTime($session->get('choose_account_from'));
+            $default_from_date = getDateTime($session->get('choose_account_from'), $requested_firefly_id);
         }
         if (!is_null($session->get('choose_account_to')))
         {
-            $default_to_date = new \DateTime($session->get('choose_account_to'));
+            $default_to_date = getDateTime($session->get('choose_account_to'), $requested_firefly_id);
         }
 
 
@@ -115,4 +116,18 @@ function ChooseAccount()
         }
     }
     $session->set('persistedFints', $fin_ts->persist());
+}
+
+function getDateTime(string $date, int $firefly_account_id) 
+{
+    if (!is_null($firefly_account_id) && $date == 'last') {
+        global $session;
+        
+        $firefly_transactions_helper = new TransactionsHelper($session->get('firefly_url'), $session->get('firefly_access_token'), $firefly_account_id);
+        $last_transaction = $firefly_transactions_helper->get_last_transaction();
+        return new \DateTime($last_transaction->date);
+    } else {
+        return new \DateTime($date);
+    }
+    
 }
