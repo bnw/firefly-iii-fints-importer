@@ -110,7 +110,7 @@ function ChooseAccount()
     $session->set('persistedFints', $fin_ts->persist());
 }
 
-function getDateTime(string $date, string $default, int $firefly_account_id) 
+function getDateTime(?string $date, string $default, ?int $firefly_account_id) 
 {
     if (!is_null($firefly_account_id) && $date == 'last') {
         global $session;
