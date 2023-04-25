@@ -28,12 +28,9 @@ class TransactionsHelper
     public function get_last_transaction()
     {
         if ($this->firefly_transactions->count() > 0) {
-            for ($i = 1; $i <= $this->firefly_transactions->count()-1; $i++) {
-                $this->firefly_transactions->next();
-            }
             if ($this->firefly_transactions->valid()) {
                 $transaction_group = $this->firefly_transactions->current();
-                return end($transaction_group->transactions);
+                return current($transaction_group->transactions);
             }
         }
     }
