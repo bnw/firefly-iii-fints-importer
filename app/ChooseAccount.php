@@ -122,7 +122,7 @@ function getDateTime(?string $date, string $default, ?int $firefly_account_id)
         } else {
             $date = $default;    
         }
-    } else if (is_null($default)) {
+    } else if (is_null($date)) {
         $date = $default;
     }
     return new \DateTime($date);   
