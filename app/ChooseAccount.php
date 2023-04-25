@@ -70,23 +70,15 @@ function ChooseAccount()
             $firefly_accounts->rewind();
         }
 
-        $default_from_date = new \DateTime('now - 1 month');
-        $default_to_date = new \DateTime('now');
-
         $automate = false;
 
         if (!is_null($session->get('choose_account_from')) && !is_null($session->get('choose_account_to')))
         {
             $automate = true;
         }
-        if (!is_null($session->get('choose_account_from')))
-        {
-            $default_from_date = getDateTime($session->get('choose_account_from'), $requested_firefly_id);
-        }
-        if (!is_null($session->get('choose_account_to')))
-        {
-            $default_to_date = getDateTime($session->get('choose_account_to'), $requested_firefly_id);
-        }
+        
+        $default_from_date = getDateTime($session->get('choose_account_from'), 'now - 1 month', $requested_firefly_id);
+        $default_to_date = getDateTime($session->get('choose_account_to'), 'now', $requested_firefly_id);
 
 
         if (empty($error)) {
@@ -118,7 +110,7 @@ function ChooseAccount()
     $session->set('persistedFints', $fin_ts->persist());
 }
 
-function getDateTime(string $date, int $firefly_account_id) 
+function getDateTime(string $date, string $default, int $firefly_account_id) 
 {
     if (!is_null($firefly_account_id) && $date == 'last') {
         global $session;
@@ -127,7 +119,11 @@ function getDateTime(string $date, int $firefly_account_id)
         $last_transaction = $firefly_transactions_helper->get_last_transaction();
         if (!is_null($last_transaction)) {
             $date = $last_transaction->date;
+        } else {
+            $date = $default;    
         }
+    } else if (is_null($default)) {
+        $date = $default;
     }
     return new \DateTime($date);   
 }
