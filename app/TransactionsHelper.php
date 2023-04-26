@@ -29,7 +29,6 @@ class TransactionsHelper
     {
         $last_transaction = null;
         for ($i = 1; $i <= $this->firefly_transactions->count(); $i++) {
-            $this->firefly_transactions->next();
             if ($this->firefly_transactions->valid()) {
                 foreach($this->firefly_transactions->current()->transactions as $transaction) {
                     if (is_null($last_transaction) or $transaction->date > $last_transaction->date) {
@@ -37,6 +36,7 @@ class TransactionsHelper
                     }
                 }
             }
+            $this->firefly_transactions->next();
         }
         return $last_transaction;
     }
