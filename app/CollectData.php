@@ -23,10 +23,10 @@ function CollectData()
         $filename = $request->request->get('data_collect_mode');
         $configuration = ConfigurationFactory::load_from_file($filename);
 
-        if ($configuration->bank_username == "") {
+        if ($request->request->has('bank_username')) {
             $configuration->bank_username = $request->request->get('bank_username');
         } 
-        if ($configuration->bank_password == "") {
+        if ($request->request->has('bank_password')) {
             $configuration->bank_password = $request->request->get('bank_password');
         }          
         if ($configuration->bank_username == "" || $configuration->bank_password == "") {
