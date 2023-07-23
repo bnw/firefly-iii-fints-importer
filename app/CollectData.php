@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function CollectData()
 {
-    global $request, $session, $twig;
+    global $request, $session, $twig, $automate_without_js;
 
     if($request->request->get('data_collect_mode') == "createNewDataset"){
         echo $twig->render(
@@ -73,6 +73,10 @@ function CollectData()
                     'auto_skip_form' => $auto_skip_form
                 ));
         } else {
+            if ($automate_without_js)
+            {
+                return Step::STEP2_LOGIN;
+            }
             echo $twig->render(
                 'skip-form.twig',
                 array(
@@ -82,4 +86,5 @@ function CollectData()
             );
         }
     }
+    return Step::DONE;
 }

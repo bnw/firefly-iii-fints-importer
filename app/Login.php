@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function Login()
 {
-    global $request, $session, $twig, $fin_ts;
+    global $request, $session, $twig, $fin_ts, $automate_without_js;
 
     if ($request->request->has('bank_2fa_device')) {
         $session->set('bank_2fa_device', $request->request->get('bank_2fa_device'));
@@ -33,6 +33,11 @@ function Login()
     if ($login_handler->needs_tan()) {
         $login_handler->pose_and_render_tan_challenge();
     } else {
+        if ($automate_without_js)
+        {
+            $session->set('persistedFints', $fin_ts->persist());
+            return Step::STEP3_CHOOSE_ACCOUNT;
+        }
         echo $twig->render(
             'skip-form.twig',
             array(
@@ -42,4 +47,5 @@ function Login()
         );
     }
     $session->set('persistedFints', $fin_ts->persist());
+    return Step::DONE;
 }

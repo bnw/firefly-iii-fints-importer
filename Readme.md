@@ -37,6 +37,13 @@ Tips
 * There is the option to reformat the description of a transaction, before it is sent to Firefly III.
   This can be done by configuring a RegEx search and replace pair. See [data/configurations/example.json](https://github.com/bnw/firefly-iii-fints-importer/blob/master/data/configurations/example.json) or the [corresponding unit test](https://github.com/bnw/firefly-iii-fints-importer/blob/master/tests/TransactionsToFireflySenderTest.php) for an example. Thanks to [dfunke](https://github.com/dfunke) for this feature!
 
+Usage without JS
+-----
+This importer can be used without `JS` (like using `curl` or `wget`). For this you have to specify two `GET` parameters:
+1. `automate=true`
+1. `config=data/configurations/example.json` where this path should be exactly the same one you see on the select box
+
+Additionally make sure that you filled out the `choose_account_automation` part in the config.
 
 Storing configurations
 ----------------------
