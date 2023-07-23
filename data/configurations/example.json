@@ -13,7 +13,7 @@
   {
     "bank_account_iban": "",
     "firefly_account_id": "",
-    "from_to_comment": "The following values will be passed directly into DateTime",
+    "from_to_comment": "The following values will be passed directly into DateTime. Set them to null to choose them manually during import process.",
     "from": "now - 7 days",
     "to": "now"
   }
