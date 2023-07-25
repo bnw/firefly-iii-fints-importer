@@ -61,7 +61,8 @@ This importer can be used without a browser (e.g. by using `curl` or `wget`). Fo
 1. `automate=true`
 1. `config=data/configurations/example.json` where this path should be exactly the same one you see on the select box
 
-Additionally make sure that you filled out the `choose_account_automation` part in the config.
+Additionally make sure that you filled out the `choose_account_automation` part in the config.  
+Thanks to [Bur0k](https://github.com/Bur0k) for this feature!
 
 
 Feedback
