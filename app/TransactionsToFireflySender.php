@@ -88,6 +88,10 @@ class TransactionsToFireflySender
             $description = $transaction->getBookingText();
         }
 
+        if ($description == "") {
+            $description = $transaction->getDescription1();
+        }
+
         if($regex_match !== "" && $regex_replace !== "") {
             $description = preg_replace($regex_match, $regex_replace, $description);
         }
