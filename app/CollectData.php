@@ -25,10 +25,10 @@ function CollectData()
 
         if ($request->request->has('bank_username')) {
             $configuration->bank_username = $request->request->get('bank_username');
-        } 
+        }
         if ($request->request->has('bank_password')) {
             $configuration->bank_password = $request->request->get('bank_password');
-        }          
+        }
         if ($configuration->bank_username == "" || $configuration->bank_password == "") {
             echo $twig->render(
                 'collecting-data.twig',
@@ -61,6 +61,11 @@ function CollectData()
         if ($tan_mode->needsTanMedium()) {
             $tan_devices = $fin_ts->getTanMedia($tan_mode);
             if (count($tan_devices) == 1) {
+                if ($automate_without_js) {
+                    $session->set('bank_2fa_device', $tan_devices[0]->getName());
+                    return Step::STEP2_LOGIN;
+                }
+
                 $auto_skip_form = true;
             } else {
                 $auto_skip_form = false;

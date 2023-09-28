@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function Choose2FADevice()
 {
-    global $request, $session, $twig;
+    global $request, $session, $twig, $automate_without_js;
 
     $session->invalidate();
     $session->set('bank_username', $request->request->get('bank_username'));
@@ -28,6 +28,11 @@ function Choose2FADevice()
     if ($tan_mode->needsTanMedium()) {
         $tan_devices = $fin_ts->getTanMedia($tan_mode);
         if (count($tan_devices) == 1) {
+            if ($automate_without_js) {
+                $session->set('bank_2fa_device', $tan_devices[0]->getName());
+                return Step::STEP2_LOGIN;
+            }
+
             $auto_submit_form_via_js = true;
         } else {
             $auto_submit_form_via_js = false;
