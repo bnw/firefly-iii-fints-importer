@@ -72,7 +72,6 @@ do
             break;
 
         default:
-            echo "Unknown step $current_step";
             $current_step = Step::DONE;
             break;
     }
