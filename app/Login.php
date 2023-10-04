@@ -1,11 +1,14 @@
 <?php
 namespace App\StepFunction;
 
+use App\ConfigurationFactory;
 use App\FinTsFactory;
 use App\Step;
 use App\TanHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 
 function Login()
 {
@@ -31,7 +34,32 @@ function Login()
     );
 
     if ($login_handler->needs_tan()) {
-        $login_handler->pose_and_render_tan_challenge();
+        if ($automate_without_js)
+        {
+            $filename = $request->request->get('data_collect_mode');
+            $configuration = ConfigurationFactory::load_from_file($filename);
+            if ($configuration->email_config->enabled) {
+                $mail = new PHPMailer();
+                $mail->isSMTP();
+                $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+                $mail->Host = $configuration->email_config->host;
+                $mail->Port = $configuration->email_config->port;
+                $mail->SMTPSecure = $configuration->email_config->smtp_secure;
+                $mail->SMTPAuth = true;
+                $mail->Username = $configuration->email_config->username;
+                $mail->Password = $configuration->email_config->password;
+                $mail->setFrom($configuration->email_config->from);
+                $mail->addAddress($configuration->email_config->to);
+                $mail->Subject = $configuration->email_config->subject;
+                $mail->Body = "A TAN is required";
+
+                if (!$mail->send()) {
+                    echo 'Mailer Error: ' . $mail->ErrorInfo;
+                }
+            }
+        } else {
+            $login_handler->pose_and_render_tan_challenge();
+        }
     } else {
         if ($automate_without_js)
         {
