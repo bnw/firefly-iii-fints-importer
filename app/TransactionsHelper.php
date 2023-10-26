@@ -34,6 +34,9 @@ class TransactionsHelper
         for ($i = 1; $i <= $this->firefly_transactions->count(); $i++) {
             if ($this->firefly_transactions->valid()) {
                 foreach($this->firefly_transactions->current()->transactions as $transaction) {
+                    if ($disregard_transfer and $transaction->type == "transfer") {
+                        continue;
+                    }
                     if (is_null($last_transaction) or $transaction->date > $last_transaction->date) {
                         $last_transaction = $transaction;
                     }
