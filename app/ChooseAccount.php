@@ -70,8 +70,8 @@ function ChooseAccount()
             $firefly_accounts->rewind();
         }
 
-        $default_from_date = new \DateTime('now - 1 month');
-        $default_to_date = new \DateTime('now');
+        $default_from_date = 'now - 1 month';
+        $default_to_date = 'now';
 
         $can_be_automated = false;
 
@@ -81,7 +81,7 @@ function ChooseAccount()
         }
         
         $default_from_date = getDateTime($session->get('choose_account_from'), $default_from_date, $requested_firefly_id);
-        $default_to_date = getDateTime($session->get('choose_account_to'), $default_from_date, $requested_firefly_id);
+        $default_to_date = getDateTime($session->get('choose_account_to'), $default_to_date, $requested_firefly_id);
 
 
         if (empty($error)) {
