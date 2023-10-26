@@ -9,6 +9,7 @@ class Configuration {
     public $bank_url;
     public $bank_code;
     public $bank_2fa;
+    public $bank_2fa_device;
     public $firefly_url;
     public $firefly_access_token;
     public $skip_transaction_review;
@@ -33,6 +34,7 @@ class ConfigurationFactory
         $configuration->bank_url                = $contentArray["bank_url"];
         $configuration->bank_code               = $contentArray["bank_code"];
         $configuration->bank_2fa                = $contentArray["bank_2fa"];
+        $configuration->bank_2fa_device         = @$contentArray["bank_2fa_device"];
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
         $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);

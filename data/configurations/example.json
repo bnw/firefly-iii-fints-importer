@@ -4,17 +4,20 @@
   "bank_code": "51091500",
   "bank_url": "https://hbci11.fiducia.de/cgi-bin/hbciservlet",
   "bank_2fa": "944",
+  "bank_2fa_device": "",
   "firefly_url": "",
   "firefly_access_token": "",
   "skip_transaction_review": "false",
+  "__description_regex_comment__": "To disable the regex search & replace of the transaction description, set them to null.",
   "description_regex_match": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",
   "description_regex_replace": "$2 [$1 | $3 | $4]",
+  "auto_submit_form_via_js": false,
   "choose_account_automation":
   {
     "bank_account_iban": "",
     "firefly_account_id": "",
-    "from_to_comment": "The following values will be passed directly into DateTime",
+    "__from_to_comment__": "The following values will be passed directly into DateTime. Set them to null to choose them manually during import process.",
     "from": "last",
-    "to": "now"
+    "to": null
   }
 }

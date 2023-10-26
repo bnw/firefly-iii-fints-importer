@@ -28,16 +28,16 @@ function Choose2FADevice()
     if ($tan_mode->needsTanMedium()) {
         $tan_devices = $fin_ts->getTanMedia($tan_mode);
         if (count($tan_devices) == 1) {
-            $automate = true;
+            $auto_submit_form_via_js = true;
         } else {
-            $automate = false;
+            $auto_submit_form_via_js = false;
         }
         echo $twig->render(
             'choose-2fa-device.twig',
             array(
                 'next_step' => Step::STEP2_LOGIN,
                 'devices' => $tan_devices,
-                'automate' => $automate
+                'auto_submit_form_via_js' => $auto_submit_form_via_js
             ));
     } else {
         echo $twig->render(

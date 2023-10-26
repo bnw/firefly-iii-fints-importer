@@ -11,9 +11,12 @@ class TransactionsHelper
      * @param $firefly_url string
      * @param $firefly_access_token string
      * @param int $firefly_account_id
+     * @param string $max_date
      */
-    public function __construct(string $firefly_url, string $firefly_access_token, 
-                                int $firefly_account_id)
+    public function __construct(string $firefly_url, 
+                                string $firefly_access_token, 
+                                int $firefly_account_id,
+                                string $max_date = 'now - 1 month')
     {
         $this->firefly_url          = $firefly_url;
         $this->firefly_access_token = $firefly_access_token;
@@ -21,11 +24,11 @@ class TransactionsHelper
 
         $firefly_transactions_request = new GetTransactionsByAccountRequest($this->firefly_url, $this->firefly_access_token);
         $firefly_transactions_request->setId($this->firefly_account_id);
-        $firefly_transactions_request->setFilter((new \DateTime('now - 1 month'))->format('Y-m-d'), (new \DateTime('now'))->format('Y-m-d'), 'all');
+        $firefly_transactions_request->setFilter((new \DateTime($max_date))->format('Y-m-d'), (new \DateTime('now'))->format('Y-m-d'), 'all');
         $this->firefly_transactions = $firefly_transactions_request->get();
     }
 
-    public function get_last_transaction()
+    public function get_last_transaction(bool $disregard_transfer = true)
     {
         $last_transaction = null;
         for ($i = 1; $i <= $this->firefly_transactions->count(); $i++) {

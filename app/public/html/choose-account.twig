@@ -7,7 +7,7 @@
 {% block content %}
     <h1>Choose an account to import from and to</h1>
     
-    {% if automate %}
+    {% if auto_submit_form_via_js %}
         <p>All account data and the date range have been set in the configuration file.</p>
 
         {{ macros.skip_form() }}

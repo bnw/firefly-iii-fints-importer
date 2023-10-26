@@ -30,6 +30,14 @@ To start the app, choose one of the three methods below:
 After completing one of the above steps, browse to http://localhost:8080 and follow the instructions 🙂
 
 
+Requirements
+------------
+* Docker **or** (PHP 8.1 or newer and [Composer](https://getcomposer.org/))
+* An already running instance of [Firefly III](https://www.firefly-iii.org/) 
+  * It must be reachable over the network by PHP from the computer you run this import app
+  * A _Personal Access Token_ which you can generate on the Profile page in Firefly III 
+
+
 Tips
 -----
 * Banks typically only allow you to access the last two years worth of transactions.
@@ -48,23 +56,26 @@ Please note that the `bank_2fa`-value in the JSON file corresponds to the number
 Thanks to [joBr99](https://github.com/joBr99) for this feature!
 
 
-Requirements
-------------
-* Docker **or** (PHP 8.1 or newer and [Composer](https://getcomposer.org/))
-* An already running instance of [Firefly III](https://www.firefly-iii.org/) 
-  * It must be reachable over the network by PHP from the computer you run this import app
-  * A _Personal Access Token_ which you can generate on the Profile page in Firefly III 
-  
-  
+Headless usage
+-----
+This importer can be used without a browser (e.g. by using `curl` or `wget`). For this you have to specify two `GET` parameters:
+1. `automate=true`
+1. `config=data/configurations/example.json` where this path should be exactly the same one you see on the select box
+
+Additionally make sure that you filled out the `choose_account_automation` part in the config.  
+Thanks to [Bur0k](https://github.com/Bur0k) for this feature!
+
+
 Feedback
 --------
 So far, I could only test this with my personal bank.
 If you find that it does not work with your bank, please [open an issue](https://github.com/bnw/firefly-iii-fints-importer/issues/new).
 
-  
+
 Screenshots
 -----------
 <img src="https://raw.githubusercontent.com/bnw/firefly-iii-fints-importer/master/docs/img/screenshots.gif" alt="Screenshots of import tool">
+
 
 Warnings
 -------

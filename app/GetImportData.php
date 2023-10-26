@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function GetImportData()
 {
-    global $request, $session, $twig, $fin_ts, $accounts;
+    global $request, $session, $twig, $fin_ts, $accounts, $automate_without_js;
 
     $fin_ts = FinTsFactory::create_from_session($session);
 
@@ -40,20 +40,30 @@ function GetImportData()
     if ($soa_handler->needs_tan()) {
         $soa_handler->pose_and_render_tan_challenge();
     } else {
+        $next_step = Step::STEP5_RUN_IMPORT_BATCHED;
+
         /** @var \Fhp\Model\StatementOfAccount\StatementOfAccount $soa */
         $soa          = $soa_handler->get_finished_action()->getStatement();
         $transactions = \App\StatementOfAccountHelper::get_all_transactions($soa);
+        $session->set('transactions_to_import', serialize($transactions));
+        $session->set('num_transactions_processed', 0);
+        $session->set('import_messages', serialize(array()));
+
+        if ($automate_without_js)
+        {
+            $session->set('persistedFints', $fin_ts->persist());
+            return $next_step;
+        }
+        
         echo $twig->render(
             'show-transactions.twig',
             array(
                 'transactions' => $transactions,
-                'next_step' => Step::STEP5_RUN_IMPORT,
+                'next_step' => $next_step,
                 'skip_transaction_review' => $session->get('skip_transaction_review')
             )
         );
-        $session->set('transactions_to_import', serialize($transactions));
-        $session->set('num_transactions_processed', 0);
-        $session->set('import_messages', serialize(array()));
     }
     $session->set('persistedFints', $fin_ts->persist());
+    return Step::DONE;
 }

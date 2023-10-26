@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function CollectData()
 {
-    global $request, $session, $twig;
+    global $request, $session, $twig, $automate_without_js;
 
     if($request->request->get('data_collect_mode') == "createNewDataset"){
         echo $twig->render(
@@ -45,6 +45,9 @@ function CollectData()
         $session->set('bank_url',                $configuration->bank_url);
         $session->set('bank_code',               $configuration->bank_code);
         $session->set('bank_2fa',                $configuration->bank_2fa);
+        if($configuration->bank_2fa_device) {
+            $session->set('bank_2fa_device',         $configuration->bank_2fa_device);
+        }
         $session->set('firefly_url',             $configuration->firefly_url);
         $session->set('firefly_access_token',    $configuration->firefly_access_token);
         $session->set('skip_transaction_review', $configuration->skip_transaction_review);
@@ -58,7 +61,7 @@ function CollectData()
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
 
-        if ($tan_mode->needsTanMedium()) {
+        if ($tan_mode->needsTanMedium() and !$session->has('bank_2fa_device')) {
             $tan_devices = $fin_ts->getTanMedia($tan_mode);
             if (count($tan_devices) == 1) {
                 $auto_skip_form = true;
@@ -73,13 +76,21 @@ function CollectData()
                     'auto_skip_form' => $auto_skip_form
                 ));
         } else {
+            if ($automate_without_js) {
+                return Step::STEP2_LOGIN;
+            }
+            $message = "Your chosen tan mode does not require you to choose a device.";
+            if($tan_mode->needsTanMedium()){
+                $message = "Your chosen tan device is '" . $session->get("bank_2fa_device") . "'.";
+            }
             echo $twig->render(
                 'skip-form.twig',
                 array(
                     'next_step' => Step::STEP2_LOGIN,
-                    'message' => "Your chosen tan mode does not require you to choose a device."
+                    'message' => $message
                 )
             );
         }
     }
+    return Step::DONE;
 }
