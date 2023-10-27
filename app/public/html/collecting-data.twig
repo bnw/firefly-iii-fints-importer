@@ -36,7 +36,7 @@
             </div>
             <div class="form-group">
                 <label for="bank_password">Password</label>
-                <input class="form-control" id="bank_password" name="bank_password" type="password" required>
+                <input class="form-control" id="bank_password" name="bank_password" type="password" required value="{{ configuration.bank_password }}">
                 <small class="form-text text-muted">This is NOT the PIN of your bank card!</small>
             </div>
             {% if configuration.bank_2fa == "" %}
