@@ -12,4 +12,7 @@ class Step extends \MyCLabs\Enum\Enum
     public const STEP4_GET_IMPORT_DATA = 'STEP4_GET_IMPORT_DATA';
     public const STEP5_RUN_IMPORT_BATCHED = 'STEP5_RUN_IMPORT_BATCHED';
     public const DONE = 'DONE';
+    
+    public const STEP_ENC0_INPUT = "ENC_INPUT";
+    public const STEP_ENC1_RESULT = "ENC_RESULT";
 }

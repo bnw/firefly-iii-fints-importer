@@ -1,0 +1,20 @@
+{% extends 'base.twig' %}
+
+{% block title %}Encrypted Password{% endblock %}
+
+{% block content %}
+    <h1>Encryption Result</h1>
+    <p>
+        <h2>For the configuration file</h2>
+        <label for="pwd_encrypted">Encrypted password (bank_password)</label>
+        <input class="form-control" id="pwd_encrypted" name="bank_password" style="font-family:monospace;" value="{{ pwd_encrypted }}" disabled>
+        <label for="nonce">Nonce</label>
+        <input class="form-control" id="nonce" name="nonce" style="font-family:monospace;" value="{{ nonce }}" disabled>
+    </p>
+    <p>
+        <h2>The secret url argument</h2>
+        <label for="key">Key</label>
+        <input class="form-control" id="key" name="key" style="font-family:monospace;" value="{{ key }}" disabled>
+    </p>
+
+{% endblock %}

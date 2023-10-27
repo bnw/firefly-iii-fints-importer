@@ -1,0 +1,23 @@
+{% extends 'base.twig' %}
+
+{% block title %}Encrypted Password{% endblock %}
+
+{% block content %}
+    <h1>Enter the password to be encrypted.</h1>
+    <form action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <div class="form-group">
+            <label for="bank_password">Password</label>
+            <input class="form-control" id="bank_password" name="bank_password" required style="font-family:monospace;">
+            <small class="form-text text-muted">
+                Password for your bank account. This will not be stored.
+            </small>
+            <label for="key">Key</label>
+            <input class="form-control" id="key" name="key" value="{{ key }}" required style="font-family:monospace;">
+            <small class="form-text text-muted">
+                Secret key to use. Use the generate one if unsure.
+            </small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
