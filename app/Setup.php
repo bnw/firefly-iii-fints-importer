@@ -7,17 +7,18 @@ function Setup()
 {
     global $twig, $automate_without_js, $request;
 
-    $requested_config_file = '';
+    $host_config_file = '';
 
     if (isset($_GET['config'])) {
         $filename = basename($_GET['config']);
-        $requested_config_file = 'data/configurations/' . $filename;
-        if (!file_exists($requested_config_file)) {
+        $host_config_file = 'data/configurations/' . $filename;
+        $docker_config_file = '/app/configurations/' . $filename;
+        if (!file_exists($host_config_file) && !file_exists($docker_config_file)) {
             echo $twig->render(
                 'error.twig',
                 array(
                     'error_header' => 'Could not find the configuration',
-                    'error_message' => 'The configuration \'' . $filename . '\' could\'t be found in the directory \'data/configurations/\''
+                    'error_message' => 'The configuration \'' . $filename . '\' could\'t be found in the host directory \'data/configurations/\' or the docker directory \'/app/configurations/\''
                 )
             );
             return;
@@ -25,10 +26,15 @@ function Setup()
 
         if ($automate_without_js)
         {
-            $request->request->set('data_collect_mode', $requested_config_file);
+            if (file_exists($host_config_file)) {
+                $request->request->set('data_collect_mode', $host_config_file);
+            } else {
+                $request->request->set('data_collect_mode', $docker_config_file);
+            }
             return Step::STEP1_COLLECTING_DATA;
         }
     }
+
 
     $configuration_files = array();
     $dirs = array('/app/configurations', 'data/configurations');
@@ -42,7 +48,7 @@ function Setup()
         'setup.twig',
         array(
             'files' => $configuration_files,
-            'requested_config_file' => $requested_config_file,
+            'host_config_file' => $host_config_file,
             'next_step' => Step::STEP1_COLLECTING_DATA
     ));
     
