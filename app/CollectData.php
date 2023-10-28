@@ -31,7 +31,7 @@ function CollectData()
         }      
 
         if (!empty($configuration->nonce)) {
-            if($request->request->has('key')) {
+            if($request->request->has('key') && !empty($request->request->get('key'))) {
                 $key = hex2bin($request->request->get('key'));
                 $nonce = hex2bin($configuration->nonce);
                 $encrypted_pwd = hex2bin($configuration->bank_password);
