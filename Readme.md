@@ -59,7 +59,9 @@ Headless usage
 -----
 This importer can be used without a browser (e.g. by using `curl` or `wget`). For this you have to specify two `GET` parameters:
 1. `automate=true`
-1. `config=data/configurations/example.json` where this path should be exactly the same one you see on the select box
+2. `config=example.json` where example.json is a config located in the "data/configurations" folder.
+3. Use `curl -X GET 'http://localhost:8080/?automate=true&config=example.json'` 
+4. or `wget -O - -q 'http://localhost:8080/?automate=true&config=example.json'` to run the importer.
 
 Additionally make sure that you filled out the `choose_account_automation` part in the config.  
 Thanks to [Bur0k](https://github.com/Bur0k) for this feature!
