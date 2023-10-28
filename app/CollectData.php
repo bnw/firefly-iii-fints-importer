@@ -31,12 +31,20 @@ function CollectData()
         }      
 
         if (!empty($configuration->nonce)) {
-            $key = hex2bin($request->request->get('key'));
-            $nonce = hex2bin($configuration->nonce);
-            $encrypted_pwd = hex2bin($configuration->bank_password);
-            
-            $configuration->bank_password = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($encrypted_pwd, '', $nonce, $key);
-        }
+            if($request->request->has('key')) {
+                $key = hex2bin($request->request->get('key'));
+                $nonce = hex2bin($configuration->nonce);
+                $encrypted_pwd = hex2bin($configuration->bank_password);
+                
+                $configuration->bank_password = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($encrypted_pwd, '', $nonce, $key);
+            } else {
+                if ($request->request->has('bank_password')) {
+                    $configuration->bank_password = $request->request->get('bank_password');
+                } else {
+                    $configuration->bank_password = "";
+                }           
+            }
+       }
         
         if ($configuration->bank_username == "" || $configuration->bank_password == "") {
             echo $twig->render(
