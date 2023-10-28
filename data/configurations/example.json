@@ -8,7 +8,7 @@
   "firefly_url": "",
   "firefly_access_token": "",
   "skip_transaction_review": "false",
-  "__description_regex_comment__": "To disable the regex search & replace of the transaction description, set them to null.",
+  "__description_regex_comment__": "To disable the regex search & replace of the transaction description, set both to an empty string.",
   "description_regex_match": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",
   "description_regex_replace": "$2 [$1 | $3 | $4]",
   "auto_submit_form_via_js": false,
