@@ -20,6 +20,6 @@ function Encrypt()
             'nonce' => bin2hex($nonce),
             'key' => bin2hex($key)
         ));
-    
+    session_destroy();
     return Step::DONE;
 }
