@@ -13,6 +13,8 @@ include 'Login.php';
 include 'ChooseAccount.php';
 include 'GetImportData.php';
 include 'RunImportBatched.php';
+include 'PwdInput.php';
+include 'Encrypt.php';
 
 use App\StepFunction;
 use App\FinTsFactory;
@@ -30,7 +32,11 @@ $automate_without_js = false;
 
 $request = Request::createFromGlobals();
 
-$current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
+if (isset($_GET['generate'])) {
+    $current_step = new Step($request->request->get("step", Step::STEP_ENC0_INPUT));
+} else {
+    $current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
+}
 
 $session = new Session();
 $session->start();
@@ -38,6 +44,8 @@ $session->start();
 if (isset($_GET['automate'])) {
     $automate_without_js = $_GET['automate'] == "true";
 }
+
+
 
 
 do
@@ -71,6 +79,14 @@ do
             $current_step = StepFunction\RunImportBatched();
             break;
 
+        case Step::STEP_ENC0_INPUT:
+            $current_step = StepFunction\PwdInput();
+            break;
+            
+        case Step::STEP_ENC1_RESULT:
+            $current_step = StepFunction\Encrypt();
+            break;
+            
         default:
             $current_step = Step::DONE;
             break;
