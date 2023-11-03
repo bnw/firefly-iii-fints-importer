@@ -110,16 +110,12 @@ function RunImportWithoutJS()
 
 function RunImportBatched()
 {
-    global $automate_without_js, $apcuAvailable;
+    global $automate_without_js;
 
     if ($automate_without_js) {
         $result = RunImportWithoutJS();
     } else {
         $result = RunImportWithJS();
     }
-    if ($apcuAvailable) {
-        apcu_clear_cache();
-    }
-    session_destroy();
     return $result;
 }
