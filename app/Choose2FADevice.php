@@ -8,12 +8,16 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function Choose2FADevice()
 {
-    global $request, $session, $twig;
+    global $request, $session, $twig, $apcuAvailable;
 
     $session->invalidate();
     $session->set('bank_username', $request->request->get('bank_username'));
-    // Hm, this most likely stores the password on disk somewhere. Could we at least scramble it a bit?
-    $session->set('bank_password', $request->request->get('bank_password'));
+    if ($apcuAvailable) {
+        apcu_store('bank_password', $request->request->get('bank_password'));
+    } else {
+        // Hm, this most likely stores the password on disk somewhere. Could we at least scramble it a bit?
+        $session->set('bank_password', $request->request->get('bank_password'));
+    }
     $session->set('bank_url', $request->request->get('bank_url'));
     $session->set('bank_code', $request->request->get('bank_code'));
     $session->set('bank_2fa', $request->request->get('bank_2fa'));

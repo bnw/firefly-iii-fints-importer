@@ -5,10 +5,17 @@ use App\Step;
 
 function Setup()
 {
-    global $twig, $automate_without_js, $request;
+    global $twig, $automate_without_js, $request, $apcuAvailable;
 
     $requested_config_file = '';
 
+    $warning = "";
+    if (!$apcuAvailable) {
+        $warning = "Warning: Your password will stored locally under " . session_save_path() . " install APCu to prevent this.";
+    } else {
+        apcu_clear_cache();
+    }
+    
     if (isset($_GET['config'])) {
         $filename = basename($_GET['config']);
         $requested_config_file = 'data/configurations/' . $filename;
@@ -43,7 +50,8 @@ function Setup()
         array(
             'files' => $configuration_files,
             'requested_config_file' => $requested_config_file,
-            'next_step' => Step::STEP1_COLLECTING_DATA
+            'next_step' => Step::STEP1_COLLECTING_DATA,
+            'warning' => $warning
     ));
     
     return Step::DONE;
