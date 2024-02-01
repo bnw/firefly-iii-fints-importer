@@ -1,4 +1,4 @@
 vendor
-data
-!data/configurations/example.json
 .idea
+configurations/*
+!configurations/example.json

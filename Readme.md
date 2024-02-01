@@ -50,7 +50,7 @@ Storing configurations
 ----------------------
 
 Instead of entering all necessary account information every time, you can load it from a JSON-file.  
-Simply create such a JSON-file in the `data/configurations` folder by adapting the provieded [`data/configurations/example.json`](data/configurations/example.json). When starting the app in your browser, you can then choose the JSON-file as a configuration source.  
+Simply create such a JSON-file in the `/configurations` folder by adapting the provided [`configurations/example.json`](configurations/example.json). When starting the app in your browser, you can then choose the JSON-file as a configuration source.  
 Please note that the `bank_2fa`-value in the JSON file corresponds to the number of the 2-factor authentication as listed in [`app/public/html/collecting-data.twig`](app/public/html/collecting-data.twig).  
 Thanks to [joBr99](https://github.com/joBr99) for this feature!
 
@@ -59,7 +59,7 @@ Headless usage
 -----
 This importer can be used without a browser (e.g. by using `curl` or `wget`). For this you have to specify two `GET` parameters:
 1. `automate=true`
-2. `config=example.json` where example.json is a config located in the "data/configurations" folder.
+2. `config=example.json` where example.json is a config located in the `configurations` folder.
 3. Use `curl -X GET 'http://localhost:8080/?automate=true&config=example.json'` 
 4. or `wget -O - -q 'http://localhost:8080/?automate=true&config=example.json'` to run the importer.
 

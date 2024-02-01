@@ -8,16 +8,16 @@ function Setup()
     global $twig, $automate_without_js, $request;
 
     $requested_config_file = '';
+    $base_dir = __DIR__ . '/../configurations/';
 
     if (isset($_GET['config'])) {
-        $filename = basename($_GET['config']);
-        $requested_config_file = 'data/configurations/' . $filename;
-        if (!file_exists($requested_config_file)) {
+        $requested_config_file = basename($_GET['config']);
+        if (!file_exists($base_dir . $requested_config_file)) {
             echo $twig->render(
                 'error.twig',
                 array(
                     'error_header' => 'Could not find the configuration',
-                    'error_message' => 'The configuration \'' . $filename . '\' could\'t be found in the directory \'data/configurations/\''
+                    'error_message' => 'The configuration \'' . $requested_config_file . '\' could\'t be found in the directory \'./configurations/\''
                 )
             );
             return;
@@ -30,12 +30,10 @@ function Setup()
         }
     }
 
-    $configuration_files = array();
-    $dirs = array('/app/configurations', 'data/configurations');
-    foreach($dirs as $dir){
-        if (file_exists($dir))
-            $configuration_files = array_merge($configuration_files,
-                preg_filter('/^/', $dir.DIRECTORY_SEPARATOR, array_diff(scandir($dir), array('.', '..') )));
+    $configuration_files = [];
+    if (file_exists($base_dir))
+    {
+        $configuration_files = array_diff(scandir($base_dir), array('.', '..'));
     }
 
     echo $twig->render(
@@ -45,6 +43,6 @@ function Setup()
             'requested_config_file' => $requested_config_file,
             'next_step' => Step::STEP1_COLLECTING_DATA
     ));
-    
+
     return Step::DONE;
 }

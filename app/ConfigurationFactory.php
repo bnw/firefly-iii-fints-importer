@@ -25,7 +25,8 @@ class ConfigurationFactory
 {
     static function load_from_file($fileName)
     {
-        $jsonFileContent = file_get_contents($fileName);
+        $base_dir = __DIR__ . '/../configurations/';
+        $jsonFileContent = file_get_contents($base_dir . $fileName);
         $contentArray = json_decode($jsonFileContent, true);
 
         $configuration = new Configuration();
