@@ -1,13 +1,13 @@
 FROM php:8.1-alpine3.14
 
-RUN apk add composer git
-
 COPY . .
 
 RUN rm -f /configurations/*
 
-RUN composer install --no-dev
-RUN composer clearcache
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+RUN composer install --no-dev \
+    && composer clearcache
 
 EXPOSE 8080
 
