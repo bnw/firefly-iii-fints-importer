@@ -11,14 +11,13 @@ function Setup()
     $base_dir = __DIR__ . '/../configurations/';
 
     if (isset($_GET['config'])) {
-        $filename = basename($_GET['config']);
-        $requested_config_file = $base_dir . $filename;
-        if (!file_exists($requested_config_file)) {
+        $requested_config_file = basename($_GET['config']);
+        if (!file_exists($base_dir . $requested_config_file)) {
             echo $twig->render(
                 'error.twig',
                 array(
                     'error_header' => 'Could not find the configuration',
-                    'error_message' => 'The configuration \'' . $filename . '\' could\'t be found in the directory \'./configurations/\''
+                    'error_message' => 'The configuration \'' . $requested_config_file . '\' could\'t be found in the directory \'./configurations/\''
                 )
             );
             return;
