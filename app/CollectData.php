@@ -25,10 +25,10 @@ function CollectData()
 
         if ($request->request->has('bank_username')) {
             $configuration->bank_username = $request->request->get('bank_username');
-        } 
+        }
         if ($request->request->has('bank_password')) {
             $configuration->bank_password = $request->request->get('bank_password');
-        }          
+        }
         if ($configuration->bank_username == "" || $configuration->bank_password == "") {
             echo $twig->render(
                 'collecting-data.twig',
