@@ -34,9 +34,9 @@ jobs:
       - uses: actions/checkout@v3
       - run: "sed -i 's/build: ./image: benkl\\/firefly-iii-fints-importer/g' docker-compose.yml"
       - name: Start image
-        run: docker-compose up -d
-      - run: docker-compose ps | grep -q app
+        run: docker compose up -d
+      - run: docker compose ps | grep -q app
       - run: curl localhost:8080
-      - run: docker-compose exec -T app composer install --dev
+      - run: docker compose exec -T app composer install --dev
       - name: Run Tests
-        run: docker-compose exec -T app ./vendor/bin/phpunit tests
+        run: docker compose exec -T app ./vendor/bin/phpunit tests
