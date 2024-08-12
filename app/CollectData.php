@@ -4,12 +4,13 @@ namespace App\StepFunction;
 use App\FinTsFactory;
 use App\ConfigurationFactory;
 use App\Step;
+use App\PasswordStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 function CollectData()
 {
-    global $request, $session, $twig, $automate_without_js, $apcuAvailable;
+    global $request, $session, $twig, $automate_without_js;
 
     if($request->request->get('data_collect_mode') == "createNewDataset"){
         echo $twig->render(
@@ -43,11 +44,7 @@ function CollectData()
         }
 
         $session->set('bank_username',           $configuration->bank_username);
-        if ($apcuAvailable) {
-            apcu_store('bank_password',          $password);    
-        } else {
-            $session->set('bank_password',       $password);
-        }       
+        PasswordStorage::set($password);        
         $session->set('bank_url',                $configuration->bank_url);
         $session->set('bank_code',               $configuration->bank_code);
         $session->set('bank_2fa',                $configuration->bank_2fa);

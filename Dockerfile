@@ -2,6 +2,9 @@ FROM php:8.1-alpine3.14
 
 RUN apk add composer git
 
+RUN pecl install apcu \
+  && docker-php-ext-enable apcu
+
 COPY . .
 
 RUN rm -f /data/configurations/*

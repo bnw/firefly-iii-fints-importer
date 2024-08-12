@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+include 'PasswordStorage.php';
 include 'Setup.php';
 include 'CollectData.php';
 include 'Choose2FADevice.php';
@@ -14,6 +15,7 @@ include 'ChooseAccount.php';
 include 'GetImportData.php';
 include 'RunImportBatched.php';
 
+use App\PasswordStorage;
 use App\StepFunction;
 use App\FinTsFactory;
 use App\ConfigurationFactory;
@@ -33,15 +35,12 @@ $request = Request::createFromGlobals();
 
 $current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
 
-$apcuAvailable = function_exists('apcu_enabled') && apcu_enabled();
-
 $session = new Session();
 $session->start();
 
 if (isset($_GET['automate'])) {
     $automate_without_js = $_GET['automate'] == "true";
 }
-
 
 do
 {
@@ -76,9 +75,7 @@ do
 
         default:
             $current_step = Step::DONE;
-            if ($apcuAvailable) {
-                apcu_clear_cache();
-            }
+            PasswordStorage::clear();
             session_destroy();
             break;
     }

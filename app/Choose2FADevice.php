@@ -3,21 +3,18 @@ namespace App\StepFunction;
 
 use App\FinTsFactory;
 use App\Step;
+use App\PasswordStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 function Choose2FADevice()
 {
-    global $request, $session, $twig, $apcuAvailable;
+    global $request, $session, $twig;
 
     $session->invalidate();
     $session->set('bank_username', $request->request->get('bank_username'));
-    if ($apcuAvailable) {
-        apcu_store('bank_password', $request->request->get('bank_password'));
-    } else {
-        // Hm, this most likely stores the password on disk somewhere. Could we at least scramble it a bit?
-        $session->set('bank_password', $request->request->get('bank_password'));
-    }
+
+    PasswordStorage::set($request->request->get('bank_password'));
     $session->set('bank_url', $request->request->get('bank_url'));
     $session->set('bank_code', $request->request->get('bank_code'));
     $session->set('bank_2fa', $request->request->get('bank_2fa'));
