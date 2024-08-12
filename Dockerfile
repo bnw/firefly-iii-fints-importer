@@ -5,6 +5,9 @@ RUN apk add --no-cache --update --virtual buildDeps  autoconf gcc make g++ zlib-
     && docker-php-ext-enable apcu \
     && apk del buildDeps
 
+RUN echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+RUN echo "apc.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+    
 RUN apk add composer git
     
 COPY . .

@@ -7,20 +7,20 @@ class PasswordStorage
     static function set(string $pwd)
     {
         if (self::apcuAvailable()) {
-            apcu_store('bank_password', $pwd);
+            apcu_store('firefly_fints_bank_password', $pwd);
         } else {
             global $session;
-            $session->set('bank_password', $pwd);
+            $session->set('firefly_fints_bank_password', $pwd);
         }
     }
     
     static function get()
     {        
         if (self::apcuAvailable()) {
-            return apcu_fetch('bank_password');
+            return apcu_fetch('firefly_fints_bank_password');
         } else {
             global $session;
-            return $session->get('bank_password');
+            return $session->get('firefly_fints_bank_password');
         }
     }
     
@@ -30,7 +30,7 @@ class PasswordStorage
             apcu_clear_cache();
         } else {
             global $session;
-            $session->set('bank_password', '');
+            $session->set('firefly_fints_bank_password', '');
         }
     }
     
