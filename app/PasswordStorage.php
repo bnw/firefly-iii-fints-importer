@@ -30,7 +30,7 @@ class PasswordStorage
     static function clear()
     {
         if (self::apcuAvailable()) {
-            apcu_clear_cache();
+            apcu_delete('firefly_fints_bank_password');
         } else {
             global $session;
             $session->set('firefly_fints_bank_password', '');
