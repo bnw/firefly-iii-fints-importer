@@ -18,9 +18,8 @@ class PasswordStorage
     static function get()
     {        
         if (self::apcuAvailable()) {
-            $success = False;
-            $result = apcu_fetch('firefly_fints_bank_password', $success);
-            assert($success, "APCu fetch failed");
+            $result = apcu_fetch('firefly_fints_bank_password');
+            assert($result, "APCu fetch failed");
             return $result;
         } else {
             global $session;

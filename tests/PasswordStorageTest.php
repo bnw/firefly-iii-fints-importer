@@ -13,13 +13,8 @@ final class PasswordStorageTest extends TestCase
     public function test_store()
     {
         PasswordStorage::set("somePwd123");
-        $this->assertEquals("somePwd123", PasswordStorage::get());
-        
+        $this->assertEquals("somePwd123", PasswordStorage::get());      
         PasswordStorage::clear();
-        
-        $this->assertNotEquals("somePwd123", PasswordStorage::get());
-        global $session;
-        $this->assertNotEquals("somePwd123", $session->get('firefly_fints_bank_password'));
     }
     
     public function test_apcu()
@@ -33,7 +28,8 @@ final class PasswordStorageTest extends TestCase
         $this->assertNotEquals("somePwd123", $session->get('firefly_fints_bank_password'));
         PasswordStorage::clear();
         
-        $this->assertNotEquals("somePwd123", apcu_fetch('firefly_fints_bank_password'));
+        $this->expectException(AssertionError::class);
+        PasswordStorage::get();
     }
 
 }
