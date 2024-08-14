@@ -4,6 +4,7 @@ namespace App\StepFunction;
 use App\FinTsFactory;
 use App\ConfigurationFactory;
 use App\Step;
+use App\PasswordStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -26,10 +27,12 @@ function CollectData()
         if ($request->request->has('bank_username')) {
             $configuration->bank_username = $request->request->get('bank_username');
         } 
+        
+        $password = $configuration->bank_password; 
         if ($request->request->has('bank_password')) {
-            $configuration->bank_password = $request->request->get('bank_password');
+            $password = $request->request->get('bank_password');
         }          
-        if ($configuration->bank_username == "" || $configuration->bank_password == "") {
+        if ($configuration->bank_username == "" || $password == "") {
             echo $twig->render(
                 'collecting-data.twig',
                 array(
@@ -41,7 +44,7 @@ function CollectData()
         }
 
         $session->set('bank_username',           $configuration->bank_username);
-        $session->set('bank_password',           $configuration->bank_password);
+        PasswordStorage::set($password);        
         $session->set('bank_url',                $configuration->bank_url);
         $session->set('bank_code',               $configuration->bank_code);
         $session->set('bank_2fa',                $configuration->bank_2fa);

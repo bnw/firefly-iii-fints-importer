@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+include 'PasswordStorage.php';
 include 'Setup.php';
 include 'CollectData.php';
 include 'Choose2FADevice.php';
@@ -14,6 +15,7 @@ include 'ChooseAccount.php';
 include 'GetImportData.php';
 include 'RunImportBatched.php';
 
+use App\PasswordStorage;
 use App\StepFunction;
 use App\FinTsFactory;
 use App\ConfigurationFactory;
@@ -23,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use App\Step;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+
 
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/public/html');
 $twig   = new \Twig\Environment($loader);
@@ -38,7 +41,6 @@ $session->start();
 if (isset($_GET['automate'])) {
     $automate_without_js = $_GET['automate'] == "true";
 }
-
 
 do
 {
@@ -73,6 +75,8 @@ do
 
         default:
             $current_step = Step::DONE;
+            PasswordStorage::clear();
+            session_destroy();
             break;
     }
 } while ($current_step != Step::DONE);
