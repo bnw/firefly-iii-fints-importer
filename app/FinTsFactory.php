@@ -25,6 +25,7 @@ class FinTsFactory
         $options->productVersion = '1.0';
         
         $password = PasswordStorage::get();
+        assert($password, "Password missing");
         
         $credentials = Credentials::create($session->get('bank_username'), $password);
         

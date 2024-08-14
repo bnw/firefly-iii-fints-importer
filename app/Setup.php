@@ -12,7 +12,7 @@ function Setup()
 
     $warning = "";
     if (!PasswordStorage::apcuAvailable()) {
-        $warning = "Warning: Your password will stored locally under " . session_save_path() . " install APCu to prevent this.";
+        $warning = "<p>Warning: Your password will stored locally under " . session_save_path() . " install APCu to prevent this.</p>";
     } else {
         apcu_clear_cache();
     }

@@ -7,7 +7,8 @@ class PasswordStorage
     static function set(string $pwd)
     {
         if (self::apcuAvailable()) {
-            apcu_store('firefly_fints_bank_password', $pwd);
+            $result = apcu_store('firefly_fints_bank_password', $pwd);
+            assert($result, "APCu store failed");
         } else {
             global $session;
             $session->set('firefly_fints_bank_password', $pwd);
@@ -17,7 +18,10 @@ class PasswordStorage
     static function get()
     {        
         if (self::apcuAvailable()) {
-            return apcu_fetch('firefly_fints_bank_password');
+            $success = False;
+            $result = apcu_fetch('firefly_fints_bank_password', $success);
+            assert($success, "APCu fetch failed");
+            return $result;
         } else {
             global $session;
             return $session->get('firefly_fints_bank_password');

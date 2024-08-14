@@ -113,9 +113,8 @@ function RunImportBatched()
     global $automate_without_js;
 
     if ($automate_without_js) {
-        $result = RunImportWithoutJS();
+        return RunImportWithoutJS();
     } else {
-        $result = RunImportWithJS();
+        return RunImportWithJS();
     }
-    return $result;
 }

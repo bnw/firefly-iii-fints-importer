@@ -7,7 +7,7 @@
 {% block content %}
     <h1>Choose data source</h1>
 
-    <p>{{ warning }}</p>
+    {{ warning | raw }}
     
     {% if requested_config_file is not empty %}
         <p>A specific config file has been requested via URL parameter.</p>
