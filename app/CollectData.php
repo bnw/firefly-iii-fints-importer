@@ -68,6 +68,10 @@ function CollectData()
             $tan_devices = $fin_ts->getTanMedia($tan_mode);
             if (count($tan_devices) == 1) {
                 $auto_skip_form = true;
+                if ($automate_without_js) {
+                    $session->set('bank_2fa_device',$tan_devices[0]);
+                    return Step::STEP2_LOGIN;
+                }
             } else {
                 $auto_skip_form = false;
             }
@@ -75,7 +79,7 @@ function CollectData()
                 'choose-2fa-device.twig',
                 array(
                     'next_step' => Step::STEP2_LOGIN,
-                    'devices' => $fin_ts->getTanMedia($tan_mode),
+                    'devices' => $tan_devices,
                     'auto_skip_form' => $auto_skip_form
                 ));
         } else {

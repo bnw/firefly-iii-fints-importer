@@ -4,6 +4,7 @@ namespace App\StepFunction;
 use App\FinTsFactory;
 use App\Step;
 use App\TanHandler;
+use App\PasswordStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -49,6 +50,8 @@ function GetImportData()
         $session->set('num_transactions_processed', 0);
         $session->set('import_messages', serialize(array()));
 
+        PasswordStorage::clear();
+        
         if ($automate_without_js)
         {
             $session->set('persistedFints', $fin_ts->persist());

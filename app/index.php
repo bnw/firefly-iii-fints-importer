@@ -75,8 +75,6 @@ do
 
         default:
             $current_step = Step::DONE;
-            PasswordStorage::clear();
-            session_destroy();
             break;
     }
 } while ($current_step != Step::DONE);

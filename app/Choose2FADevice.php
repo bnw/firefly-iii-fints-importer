@@ -13,6 +13,8 @@ function Choose2FADevice()
 
     $session->invalidate();
     $session->set('bank_username', $request->request->get('bank_username'));
+
+    PasswordStorage::set($request->request->get('bank_password'));
     $session->set('bank_url', $request->request->get('bank_url'));
     $session->set('bank_code', $request->request->get('bank_code'));
     $session->set('bank_2fa', $request->request->get('bank_2fa'));
