@@ -44,6 +44,7 @@ Tips
   In order to ensure that your bank account shows the correct balance in Firefly III, even if not all of it's history can be imported, adjust the account's starting balance accordingly in Firefly III.
 * There is the option to reformat the description of a transaction, before it is sent to Firefly III.
   This can be done by configuring a RegEx search and replace pair. See [data/configurations/example.json](https://github.com/bnw/firefly-iii-fints-importer/blob/master/data/configurations/example.json) or the [corresponding unit test](https://github.com/bnw/firefly-iii-fints-importer/blob/master/tests/TransactionsToFireflySenderTest.php) for an example. Thanks to [dfunke](https://github.com/dfunke) for this feature!
+* The Firefly duplicate detection is not perfect. To minimize the number of potential duplicates, you can use `from: last` to set the date of the last transaction as the first date to import. See [data/configurations/example.json](https://github.com/bnw/firefly-iii-fints-importer/blob/master/data/configurations/example.json)
 
 
 Storing configurations

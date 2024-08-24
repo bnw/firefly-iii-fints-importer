@@ -4,6 +4,7 @@ namespace App\StepFunction;
 use App\FinTsFactory;
 use App\Step;
 use App\TanHandler;
+use App\TransactionsHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -69,8 +70,8 @@ function ChooseAccount()
             $firefly_accounts->rewind();
         }
 
-        $default_from_date = new \DateTime('now - 1 month');
-        $default_to_date = new \DateTime('now');
+        $default_from_date = 'now - 1 month';
+        $default_to_date = 'now';
 
         $can_be_automated = false;
 
@@ -78,14 +79,9 @@ function ChooseAccount()
         {
             $can_be_automated = true;
         }
-        if (!is_null($session->get('choose_account_from')))
-        {
-            $default_from_date = new \DateTime($session->get('choose_account_from'));
-        }
-        if (!is_null($session->get('choose_account_to')))
-        {
-            $default_to_date = new \DateTime($session->get('choose_account_to'));
-        }
+        
+        $default_from_date = getDateTime($session->get('choose_account_from'), $default_from_date, $requested_firefly_id);
+        $default_to_date = getDateTime($session->get('choose_account_to'), $default_to_date, $requested_firefly_id);
 
 
         if (empty($error)) {
@@ -127,3 +123,22 @@ function ChooseAccount()
     $session->set('persistedFints', $fin_ts->persist());
     return Step::DONE;
 }
+
+function getDateTime(?string $date, string $default, ?int $firefly_account_id) 
+{
+    if (!is_null($firefly_account_id) && $date == 'last') {
+        global $session;
+        
+        $firefly_transactions_helper = new TransactionsHelper($session->get('firefly_url'), $session->get('firefly_access_token'), $firefly_account_id);
+        $last_transaction = $firefly_transactions_helper->get_last_transaction();
+        if (!is_null($last_transaction)) {
+            $date = $last_transaction->date;
+        } else {
+            $date = $default;    
+        }
+    } else if (is_null($date)) {
+        $date = $default;
+    }
+    return new \DateTime($date);   
+}
+
