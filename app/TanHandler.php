@@ -36,13 +36,7 @@ class TanHandler
         if ($this->session->has($this->action_id)) {
             $this->action = unserialize($this->session->get($this->action_id));
             $this->session->remove($this->action_id);
-            if ($this->fin_ts->getSelectedTanMode()->isDecoupled()) {
-                if ($this->action->getTanRequest() != null && !$this->fin_ts->checkDecoupledSubmission($this->action)) {
-                    $this->action = ($this->create_action_lambda)();
-                }
-            } else {
-                $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
-            }
+            $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
         } else {
             $this->action = ($this->create_action_lambda)();
         }
@@ -77,8 +71,7 @@ class TanHandler
                 'next_step' => $this->current_step,
                 'challenge' => $tanRequest->getChallenge(),
                 'device' => $tanRequest->getTanMediumName(),
-                'challenge_image_src' => $challengeImageSrc,
-                'is_decoupled_tan_mode' => $this->fin_ts->getSelectedTanMode()->isDecoupled(),
+                'challenge_image_src' => $challengeImageSrc
             )
         );
         $this->session->set($this->action_id, serialize($this->action));
