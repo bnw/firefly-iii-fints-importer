@@ -16,12 +16,10 @@
 
     <form action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">
-        {% if not is_decoupled_tan_mode %}
         <div class="form-group">
             <label for="tan">TAN</label>
             <input class="form-control" id="tan" name="tan" required style="font-family:monospace;">
         </div>
-        {% endif %}
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}
