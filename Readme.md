@@ -82,3 +82,10 @@ Warnings
 -------
 * Note that most banks handle failed FinTS logins similar to failed website logins. Thus, if you fail to enter your password correctly 3 times in a row, your access will most likely be blocked. Then you need to take some bank specific actions to reenable your FinTS & web access.
 * For ING DiBa: According to [this wiki](https://www.willuhn.de/wiki/doku.php?id=psd2#ing), a login into the website is required every 90 days.
+
+
+Bank specifics
+-------
+* For ING DiBa you need a password that is between 5 and 10 characters, not less not more as you will otherwise run into this error:
+  * ```Anmeldung nur mit 10-stelliger Kontonummer und 5 bis 10-stelliger PIN möglich.```
+  * *Note: this will not lead to your account being blocked due to to many attempts as you do not attempt a login funnily enough*
