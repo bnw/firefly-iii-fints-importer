@@ -19,6 +19,7 @@ class Configuration {
     public $choose_account_to;
     public $description_regex_match;
     public $description_regex_replace;
+    public $nonce;
 }
 
 class ConfigurationFactory
@@ -51,7 +52,8 @@ class ConfigurationFactory
         }
         $configuration->description_regex_match   = $contentArray["description_regex_match"];
         $configuration->description_regex_replace = $contentArray["description_regex_replace"];
-
+        $configuration->nonce = $contentArray["nonce"];
+        
         return $configuration;
     }
 }

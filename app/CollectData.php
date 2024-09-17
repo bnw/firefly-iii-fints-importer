@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function CollectData()
 {
-    global $request, $session, $twig, $automate_without_js;
+    global $request, $session, $twig, $automate_without_js, $encryption_key;
 
     if($request->request->get('data_collect_mode') == "createNewDataset"){
         echo $twig->render(
@@ -28,7 +28,24 @@ function CollectData()
         } 
         if ($request->request->has('bank_password')) {
             $configuration->bank_password = $request->request->get('bank_password');
-        }          
+        }      
+
+        if (!empty($configuration->nonce)) {
+            if($request->request->has('key') && !empty($request->request->get('key'))) {
+                $key = hex2bin($request->request->get('key'));
+                $nonce = hex2bin($configuration->nonce);
+                $encrypted_pwd = hex2bin($configuration->bank_password);
+                
+                $configuration->bank_password = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($encrypted_pwd, '', $nonce, $key);
+            } else {
+                if ($request->request->has('bank_password')) {
+                    $configuration->bank_password = $request->request->get('bank_password');
+                } else {
+                    $configuration->bank_password = "";
+                }           
+            }
+       }
+        
         if ($configuration->bank_username == "" || $configuration->bank_password == "") {
             echo $twig->render(
                 'collecting-data.twig',
@@ -39,7 +56,7 @@ function CollectData()
                 ));
             return;
         }
-
+            
         $session->set('bank_username',           $configuration->bank_username);
         $session->set('bank_password',           $configuration->bank_password);
         $session->set('bank_url',                $configuration->bank_url);

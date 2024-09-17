@@ -8,7 +8,12 @@ function Setup()
     global $twig, $automate_without_js, $request;
 
     $requested_config_file = '';
-
+    $key = null;
+    
+    if (isset($_GET['key'])) {
+        $key = $_GET['key'];
+    } 
+   
     if (isset($_GET['config'])) {
         $filename = basename($_GET['config']);
         $requested_config_file = 'data/configurations/' . $filename;
@@ -26,6 +31,7 @@ function Setup()
         if ($automate_without_js)
         {
             $request->request->set('data_collect_mode', $requested_config_file);
+            $request->request->set('key', $key);
             return Step::STEP1_COLLECTING_DATA;
         }
     }
@@ -41,6 +47,7 @@ function Setup()
     echo $twig->render(
         'setup.twig',
         array(
+            'key' => $key,
             'files' => $configuration_files,
             'requested_config_file' => $requested_config_file,
             'next_step' => Step::STEP1_COLLECTING_DATA
