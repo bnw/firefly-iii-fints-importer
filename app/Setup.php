@@ -2,6 +2,7 @@
 namespace App\StepFunction;
 
 use App\Step;
+use App\PasswordStorage;
 
 function Setup()
 {
@@ -9,6 +10,13 @@ function Setup()
 
     $requested_config_file = '';
 
+    $warning = "";
+    if (!PasswordStorage::apcuAvailable()) {
+        $warning = "<p>Warning: Your password will stored locally under " . session_save_path() . " install APCu to prevent this.</p>";
+    } else {
+        PasswordStorage::clear();
+    }
+    
     if (isset($_GET['config'])) {
         $filename = basename($_GET['config']);
         $requested_config_file = 'data/configurations/' . $filename;
@@ -43,7 +51,8 @@ function Setup()
         array(
             'files' => $configuration_files,
             'requested_config_file' => $requested_config_file,
-            'next_step' => Step::STEP1_COLLECTING_DATA
+            'next_step' => Step::STEP1_COLLECTING_DATA,
+            'warning' => $warning
     ));
     
     return Step::DONE;
