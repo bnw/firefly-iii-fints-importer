@@ -52,7 +52,8 @@ function RunImportWithJS()
             'done.twig',
             array(
                 'import_messages' => $import_messages,
-                'total_num_transactions' => count($transactions)
+                'total_num_transactions' => count($transactions),
+                'fints_persistence' => base64_encode($session->get('persistedFints'))
             )
         );
         $session->invalidate();

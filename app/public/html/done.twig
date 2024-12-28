@@ -7,6 +7,13 @@
 
     <p>{{ total_num_transactions }} transactions have been sent to Firefly III.</p>
 
+    <p>
+        You had to grant access to this importer using your TAN-mode.
+        To use this granted access on subsequent imports, you can use this persistence string.
+        It should be treated as a secret and can be used on the json configuration file.
+        <pre>{{ fints_persistence }}</pre>
+    </p>
+
     {% if import_messages is not empty %}
         <div class="alert alert-warning">
             For {{ import_messages | length }} transactions, Firefly III reported some problems which are listed below. <br>

@@ -20,6 +20,8 @@ function Login()
     $login_handler = new TanHandler(
         function () {
             global $fin_ts;
+            // fresh start, forget any dialog that may have been persisted
+            $fin_ts->forgetDialog();
             return $fin_ts->login();
         },
         'login-action',
