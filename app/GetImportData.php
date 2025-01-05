@@ -64,6 +64,7 @@ function GetImportData()
             )
         );
     }
+    $fin_ts->close();
     $session->set('persistedFints', $fin_ts->persist());
     return Step::DONE;
 }
