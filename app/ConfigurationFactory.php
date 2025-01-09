@@ -12,6 +12,7 @@ class Configuration {
     public $bank_2fa_device;
     public $firefly_url;
     public $firefly_access_token;
+    public $firefly_cert;
     public $skip_transaction_review;
     public $bank_account_iban;
     public $firefly_account_id;
@@ -37,6 +38,7 @@ class ConfigurationFactory
         $configuration->bank_2fa_device         = @$contentArray["bank_2fa_device"];
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
+        $configuration->firefly_cert            = $contentArray["firefly_cert"];
         $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
         if (isset($contentArray["choose_account_automation"])) {
             $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"];

@@ -36,6 +36,7 @@ Requirements
 * An already running instance of [Firefly III](https://www.firefly-iii.org/) 
   * It must be reachable over the network by PHP from the computer you run this import app
   * A _Personal Access Token_ which you can generate on the Profile page in Firefly III 
+  * _Optional_ TLS client certificate.
 
 
 Tips

@@ -35,6 +35,7 @@ function ChooseAccount()
         $bank_accounts            = $list_accounts_handler->get_finished_action()->getAccounts();
         $firefly_accounts_request = new GetAccountsRequest($session->get('firefly_url'), $session->get('firefly_access_token'));
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
+        $firefly_accounts_request->setCert($session->get('firefly_cert'));
         $firefly_accounts = $firefly_accounts_request->get();
 
         $requested_bank_index = -1;

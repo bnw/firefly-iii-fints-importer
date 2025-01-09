@@ -7,6 +7,7 @@
   "bank_2fa_device": "",
   "firefly_url": "",
   "firefly_access_token": "",
+  "firefly_cert": null,
   "skip_transaction_review": "false",
   "__description_regex_comment__": "To disable the regex search & replace of the transaction description, set both to an empty string.",
   "description_regex_match": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",

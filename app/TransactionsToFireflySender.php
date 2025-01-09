@@ -20,18 +20,20 @@ class TransactionsToFireflySender
      * @param int $firefly_account_id
      */
     public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, 
-                                int $firefly_account_id,
+                                string|array|null $firefly_cert, int $firefly_account_id,
                                 string $regex_match, string $regex_replace)
     {
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
         $this->firefly_access_token = $firefly_access_token;
+        $this->firefly_cert         = $firefly_cert;
         $this->firefly_account_id   = $firefly_account_id;
         $this->regex_match          = $regex_match;
         $this->regex_replace        = $regex_replace;
 
         $firefly_accounts_request = new GetAccountsRequest($this->firefly_url, $this->firefly_access_token);
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
+        $firefly_accounts_request->setCert($this->firefly_cert);
         $this->firefly_accounts = $firefly_accounts_request->get();
     }
 
@@ -128,6 +130,7 @@ class TransactionsToFireflySender
         foreach ($this->transactions as $transaction) {
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
+            $request->setCert($this->firefly_cert);
             $request->setBody(
                 self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
             );
@@ -150,6 +153,7 @@ class TransactionsToFireflySender
     private $transactions;
     private $firefly_url;
     private $firefly_access_token;
+    private $firefly_cert;
     private $firefly_account_id;
     private $firefly_accounts;
     private $regex_match;

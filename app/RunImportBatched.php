@@ -16,6 +16,7 @@ function RunImport($transactions)
         $transactions,
         $session->get('firefly_url'),
         $session->get('firefly_access_token'),
+        $session->get('firefly_cert'),
         $session->get('firefly_account'),
         $session->get('description_regex_match', ""),
         $session->get('description_regex_replace', "")
