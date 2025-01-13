@@ -5,6 +5,7 @@
   "bank_url": "https://hbci11.fiducia.de/cgi-bin/hbciservlet",
   "bank_2fa": "944",
   "bank_2fa_device": "",
+  "bank_fints_persistence": "",
   "firefly_url": "",
   "firefly_access_token": "",
   "skip_transaction_review": "false",

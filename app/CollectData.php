@@ -48,6 +48,9 @@ function CollectData()
         if($configuration->bank_2fa_device) {
             $session->set('bank_2fa_device',         $configuration->bank_2fa_device);
         }
+        if($configuration->bank_fints_persistence) {
+            $session->set('fints_persistence',   $configuration->bank_fints_persistence);
+        }
         $session->set('firefly_url',             $configuration->firefly_url);
         $session->set('firefly_access_token',    $configuration->firefly_access_token);
         $session->set('skip_transaction_review', $configuration->skip_transaction_review);
