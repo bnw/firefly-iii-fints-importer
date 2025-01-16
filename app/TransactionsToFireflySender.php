@@ -116,7 +116,7 @@ class TransactionsToFireflySender
                     'destination_id' => $destination['id'] ?? null,
                     'destination_iban' => $destination['iban'] ?? null,
                     'sepa_ct_id' => $transaction->getEndToEndID() ?? null,
-                    'notes' => $transaction->getStructuredDescription()['ABWA'] ?? null,
+                    'notes' => $transaction->getStructuredDescription()['ABWA'] ?? $destination['name'] ?? null,
                 )
             )
         );
