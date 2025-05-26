@@ -20,5 +20,17 @@
     "__from_to_comment__": "The following values will be passed directly into DateTime. Set them to null to choose them manually during import process.",
     "from": "now - 7 days",
     "to": "now"
+  },
+  "tan_required_email_notification":
+  {
+    "host": "smtp.gmail.com",
+    "port": "465",
+    "__smtp_secure_comment__": "either tls for STARTTLS or ssl for SMTPS",
+    "smtp_secure": "ssl",
+    "username": "",
+    "password": "",
+    "from": "",
+    "to": "",
+    "subject": "[Firefly III Fin-TS] A Tan is required"
   }
 }
