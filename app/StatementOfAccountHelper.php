@@ -175,23 +175,25 @@ class StatementOfAccountHelper
                     $existingDesc['CURR'] = $currencyCode;
                     $transaction->setStructuredDescription($existingDesc);
 
-                    // Set booking text from entry-level additional info
-                    $additionalInfo = $entry->getAdditionalInfo();
-                    if ($additionalInfo) {
-                        $transaction->setBookingText($additionalInfo);
-                    }
-
-                    // Set description1 as additional fallback (use counterparty name or additional info)
-                    $description1 = '';
+                    // Use unstructured blocks for booking info
+                    $bookingText = '';
                     if ($detail && $detail->getRemittanceInformation()) {
                         // Try to get unstructured remittance info blocks as fallback
                         $unstructuredBlocks = $detail->getRemittanceInformation()->getUnstructuredBlocks();
                         if (!empty($unstructuredBlocks)) {
-                            $description1 = $unstructuredBlocks[0]->getMessage();
+                            foreach($unstructuredBlocks as $unstructuredBlock) {
+                                $bookingText = $bookingText . ' ' . $unstructuredBlock->getMessage();
+                            }
                         }
                     }
-                    if (empty($description1) && $additionalInfo) {
-                        $description1 = $additionalInfo;
+                    if (!empty($bookingText)) {
+                        $transaction->setBookingText($bookingText);
+                    }
+
+                    // Set description1 to additional info as fallback for booking info
+                    $description1 = $entry->getAdditionalInfo();
+                    if (!$description1) {
+                        $description1 = $bookingText;
                     }
                     if (!empty($description1)) {
                         $transaction->setDescription1($description1);

@@ -87,9 +87,9 @@ class TransactionsToFireflySender
         }
         $firefly_accounts->rewind();
 
-        $description = $transaction->getMainDescription();
+        $description = $transaction->getBookingText();
         if ($description == "") {
-            $description = $transaction->getBookingText();
+            $description = $transaction->getMainDescription();
         }
 
         if ($description == "") {
