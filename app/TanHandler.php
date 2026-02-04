@@ -41,7 +41,12 @@ class TanHandler
                     $this->action = ($this->create_action_lambda)();
                 }
             } else {
-                $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
+                try {
+                    $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
+                } catch (\Fhp\Protocol\ServerException $e) {
+                    $this->session->set('tan_error', $e->getMessage());
+                    // $this->action = ($this->create_action_lambda)();
+                }
             }
         } else {
             $this->action = ($this->create_action_lambda)();

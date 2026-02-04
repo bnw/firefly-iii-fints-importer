@@ -18,22 +18,40 @@ function Login()
     $fin_ts = FinTsFactory::create_from_session($session);
 
     $current_step  = new Step($request->request->get("step", Step::STEP0_SETUP));
-    $login_handler = new TanHandler(
-        function () {
-            global $fin_ts;
-            // fresh start, forget any dialog that may have been persisted
-            $fin_ts->forgetDialog();
-            return $fin_ts->login();
-        },
-        'login-action',
-        $session,
-        $twig,
-        $fin_ts,
-        $current_step,
-        $request
-    );
+    try {
+        $login_handler = new TanHandler(
+            function () {
+                global $fin_ts;
+                $fin_ts->forgetDialog();
+                try {
+                    return $fin_ts->login();
+                } catch (\Fhp\Protocol\ServerException $e) {
+                    if (strpos($e->getMessage(), '9040') !== false && strpos($e->getMessage(), 'Resynchronisation') !== false) {
+                        Logger::error("chipTAN-Resynchronisation erforderlich: " . $e->getMessage());
+                    } else {
+                        Logger::error("FinTS-Fehler: " . $e->getMessage());
+                    }
+                    throw $e; // Hier weiterwerfen, damit der äußere catch greift
+                }
+            },
+            'login-action',
+            $session,
+            $twig,
+            $fin_ts,
+            $current_step,
+            $request
+        );
+    } catch (\Exception $e) {
+        Logger::error("Fehler beim Erstellen des TanHandlers: " . $e->getMessage());
+        // Hier kannst du eine Fehlermeldung anzeigen oder einen Redirect machen
+        echo $twig->render('error.twig', [
+            'error_header' => 'TAN-Fehler',
+            'message' => 'Fehlermeldung: ' . htmlspecialchars($e->getMessage())
+        ]);
+        return $e;
+    }
 
-    if ($login_handler->needs_tan()) {
+    if ($login_handler  && $login_handler->needs_tan()) {
         $login_handler->pose_and_render_tan_challenge();
     } else {
         // Detect supported statement formats from BPD (now safely cached after login)
@@ -50,11 +68,6 @@ function Login()
         } else {
             Logger::warning("Bank supports neither CAMT nor MT940 - will attempt CAMT first");
             $session->set('statement_format', 'camt'); // Default, let exception handling deal with it
-        }
-
-        if ($session->get('force_mt940')) {
-            Logger::info("Forcing MT940 format as per configuration");
-            $session->set('statement_format', 'mt940');
         }
 
         if ($automate_without_js)
