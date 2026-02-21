@@ -164,6 +164,8 @@ class TransactionsToFireflySender
                         $journals[$journal->id] = $journal->tags;
                     }
                     $group_ids[$group->id] = $journals;
+                } else {
+                    Logger::trace("Transaction accepted by Firefly III but no group ID returned; skipping for tag application.");
                 }
             } else {
                 throw new \Exception('Import went wrong');
