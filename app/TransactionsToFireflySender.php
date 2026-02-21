@@ -132,29 +132,45 @@ class TransactionsToFireflySender
         );
     }
 
-    public function send_transactions()
+    public function send_transactions(): array
     {
-        $result = array();
+        $errors = [];
+        $group_ids = [];
+
         foreach ($this->transactions as $transaction) {
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
             $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
+                self::transform_transaction_to_firefly_request_body(
+                    $transaction,
+                    $this->firefly_account_id,
+                    $this->firefly_accounts,
+                    $this->regex_match,
+                    $this->regex_replace
+                )
             );
 
             $response = $request->post();
             if ($response instanceof ValidationErrorResponse) {
-                $errors   = $response->errors->all();
-                $errors[] = "Firefly III request: " . json_encode($request->getBody());
-                $errors[] = "Transaction data: " . print_r($transaction, true);
-                $result[] = array('transaction' => $transaction, 'messages' => $errors);
-            } else if ($response instanceof PostTransactionResponse) {
-                //everything went fine :)
+                $errs   = $response->errors->all();
+                $errs[] = "Firefly III request: " . json_encode($request->getBody());
+                $errs[] = "Transaction data: " . print_r($transaction, true);
+                $errors[] = array('transaction' => $transaction, 'messages' => $errs);
+            } elseif ($response instanceof PostTransactionResponse) {
+                $group = $response->getTransactionGroup();
+                if ($group !== null) {
+                    $journals = [];
+                    foreach ($group->transactions as $journal) {
+                        $journals[$journal->id] = $journal->tags;
+                    }
+                    $group_ids[$group->id] = $journals;
+                }
             } else {
                 throw new \Exception('Import went wrong');
             }
         }
-        return $result;
+
+        return ['errors' => $errors, 'group_ids' => $group_ids];
     }
 
     private $transactions;
