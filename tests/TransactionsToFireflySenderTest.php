@@ -250,10 +250,10 @@ final class TransactionsToFireflySenderTest extends TestCase
     public function test_add_import_tag_defaults_to_false(): void
     {
         $config_file_name = "test_add_import_tag_default.json";
-        file_put_contents($config_file_name, json_encode([
+        file_put_contents($config_file_name, json_encode(array(
             "description_regex_match" => "",
             "description_regex_replace" => ""
-        ]));
+        )));
         $configuration = @ConfigurationFactory::load_from_file($config_file_name);
         $this->assertFalse($configuration->add_import_tag);
         unlink($config_file_name);
@@ -262,11 +262,11 @@ final class TransactionsToFireflySenderTest extends TestCase
     public function test_add_import_tag_can_be_enabled(): void
     {
         $config_file_name = "test_add_import_tag_enabled.json";
-        file_put_contents($config_file_name, json_encode([
+        file_put_contents($config_file_name, json_encode(array(
             "description_regex_match" => "",
             "description_regex_replace" => "",
             "add_import_tag" => true
-        ]));
+        )));
         $configuration = @ConfigurationFactory::load_from_file($config_file_name);
         $this->assertTrue($configuration->add_import_tag);
         unlink($config_file_name);
