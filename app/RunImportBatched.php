@@ -29,6 +29,9 @@ function RunImport($transactions): array
         $session->set('imported_group_ids', serialize(array_merge($existing, $result['group_ids'])));
     }
 
+    // Note: send_transactions() returns ['errors'=>[], 'group_ids'=>[]].
+    // Only errors are returned here; callers (RunImportStep) expect a flat error array.
+    // Do not change this to return the full $result — it would corrupt import_messages.
     return $result['errors'];
 }
 
