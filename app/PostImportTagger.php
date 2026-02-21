@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Logger;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTagRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\PutTransactionRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
@@ -47,7 +48,7 @@ class PostImportTagger
             if ($response instanceof ValidationErrorResponse) {
                 Logger::warn('Could not create import tag: ' . json_encode($response->errors->all()));
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Logger::warn('Could not create import tag: ' . $e->getMessage());
         }
     }
@@ -71,7 +72,7 @@ class PostImportTagger
 
         try {
             $request->put();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Logger::warn("Could not apply tag to transaction group {$group_id}: " . $e->getMessage());
         }
     }
