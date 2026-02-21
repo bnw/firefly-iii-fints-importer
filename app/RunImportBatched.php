@@ -24,7 +24,7 @@ function RunImport($transactions): array
 
     if ($session->get('add_import_tag', false) && !empty($result['group_ids'])) {
         $existing = $session->has('imported_group_ids')
-            ? unserialize($session->get('imported_group_ids'))
+            ? (unserialize($session->get('imported_group_ids')) ?: array())
             : array();
         $session->set('imported_group_ids', serialize(array_merge($existing, $result['group_ids'])));
     }
@@ -41,7 +41,7 @@ function ApplyImportTag(): void
     }
 
     $group_ids = $session->has('imported_group_ids')
-        ? unserialize($session->get('imported_group_ids'))
+        ? (unserialize($session->get('imported_group_ids')) ?: array())
         : array();
 
     $tagger = new \App\PostImportTagger(
