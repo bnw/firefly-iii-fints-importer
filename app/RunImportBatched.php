@@ -26,7 +26,7 @@ function RunImport($transactions): array
         $existing = $session->has('imported_group_ids')
             ? (unserialize($session->get('imported_group_ids')) ?: array())
             : array();
-        $session->set('imported_group_ids', serialize(array_merge($existing, $result['group_ids'])));
+        $session->set('imported_group_ids', serialize($existing + $result['group_ids']));
     }
 
     // Note: send_transactions() returns ['errors'=>[], 'group_ids'=>[]].
