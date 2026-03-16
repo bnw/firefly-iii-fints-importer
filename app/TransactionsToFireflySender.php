@@ -87,49 +87,57 @@ class TransactionsToFireflySender
         }
         $firefly_accounts->rewind();
 
-        $description = $transaction->getMainDescription();
-        if ($description == "") {
-            $description = $transaction->getBookingText();
-        }
+        // Determine Description
+        $description = $transaction->getMainDescription() ?: 
+                       $transaction->getBookingText() ?: 
+                       $transaction->getDescription1() ?: 
+                       '';
 
-        if ($description == "") {
-            $description = $transaction->getDescription1();
-        }
-
-        if($regex_match !== "" && $regex_replace !== "") {
+        if ($regex_match !== "" && $regex_replace !== "") {
             $description = preg_replace($regex_match, $regex_replace, $description);
         }
 
-        if($description == null) {
-            throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
+        // Extract structured data
+        $structuredDesc = $transaction->getStructuredDescription();
+        $currencyCode   = $structuredDesc['CURR'] ?? null;
+        $abwa           = $structuredDesc['ABWA'] ?? null;
+
+        // Determine Notes (Strategic choice for duplicate detection)
+        if ($type === TransactionType::TRANSFER) {
+            // We explicitly set notes to null for transfers. 
+            // This ensures the hash is identical even if banks provide 
+            // different names (e.g., "Me" vs "Me & Partner").
+            $notes = null; 
+            Logger::info("DEBUG: Transfer detected. Forcing notes to null for duplicate detection.");
+        } else {
+            // For normal deposits/withdrawals, keep the helpful info.
+            $notes = $abwa ?? $destination['name'] ?? null;
         }
 
-        // Get currency code from structured description (set by CAMT parser)
-        $structuredDesc = $transaction->getStructuredDescription();
-        $currencyCode = $structuredDesc['CURR'] ?? null;
+        Logger::debug("DEBUG: Transformation: Type=$type, Desc='$description', Notes='$notes'");
 
-        // Build transaction array and filter out null values
+        // Build transaction array
         $transactionData = array_filter([
-            'type' => $type,
-            'date' => $transaction->getValutaDate()->format('Y-m-d'),
-            'amount' => $amount,
-            'description' => $description,
-            'currency_code' => $currencyCode,
-            'source_name' => $source['name'] ?? null,
-            'source_id' => $source['id'] ?? null,
-            'source_iban' => $source['iban'] ?? null,
+            'type'             => $type,
+            'date'             => $transaction->getValutaDate()->format('Y-m-d'),
+            'amount'           => $amount,
+            'description'      => $description,
+            'currency_code'    => $currencyCode,
+            'source_name'      => $source['name'] ?? null,
+            'source_id'        => $source['id'] ?? null,
+            'source_iban'      => $source['iban'] ?? null,
             'destination_name' => $destination['name'] ?? null,
-            'destination_id' => $destination['id'] ?? null,
+            'destination_id'   => $destination['id'] ?? null,
             'destination_iban' => $destination['iban'] ?? null,
-            'sepa_ct_id' => $transaction->getEndToEndID() ?: null,
-            'notes' => $structuredDesc['ABWA'] ?? $destination['name'] ?? null,
+            'sepa_ct_id'       => $transaction->getEndToEndID() ?: null,
+            'notes'            => $notes,
         ], fn($value) => $value !== null);
 
-        return array(
-            'apply_rules' => true,
+        return [
+            'apply_rules'             => true,
             'error_if_duplicate_hash' => true,
-            'transactions' => array($transactionData)
-        );
+            'transactions'            => [$transactionData]
+        ];
     }
 
     public function send_transactions()
