@@ -12,6 +12,16 @@
   "__description_regex_comment__": "To disable the regex search & replace of the transaction description, set both to an empty string.",
   "description_regex_match": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",
   "description_regex_replace": "$2 [$1 | $3 | $4]",
+  "description_replacement_rules": [
+    {
+      "from": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",
+      "to": "$2 [$1 | $3 | $4]"
+    },
+    {
+      "from": "GUTSCHR. UEBERW. DAUERAUFTR",
+      "to": "DAUERAUFTRAG"
+    }
+  ],
   "auto_submit_form_via_js": false,
   "force_mt940": false,
   "choose_account_automation":

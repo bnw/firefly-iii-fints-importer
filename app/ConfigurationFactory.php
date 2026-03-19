@@ -20,6 +20,7 @@ class Configuration {
     public $choose_account_to;
     public $description_regex_match;
     public $description_regex_replace;
+    public $description_replacement_rules;
     public $force_mt940;
 }
 
@@ -54,9 +55,10 @@ class ConfigurationFactory
             $configuration->choose_account_from = NULL;
             $configuration->choose_account_to = NULL;
         }
-        $configuration->description_regex_match   = $contentArray["description_regex_match"];
-        $configuration->description_regex_replace = $contentArray["description_regex_replace"];
-        $configuration->force_mt940               = filter_var($contentArray["force_mt940"] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $configuration->description_regex_match       = $contentArray["description_regex_match"] ?? "";
+        $configuration->description_regex_replace     = $contentArray["description_regex_replace"] ?? "";
+        $configuration->description_replacement_rules = $contentArray["description_replacement_rules"] ?? [];
+        $configuration->force_mt940                   = filter_var($contentArray["force_mt940"] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         return $configuration;
     }

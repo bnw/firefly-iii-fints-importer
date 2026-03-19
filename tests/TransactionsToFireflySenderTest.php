@@ -95,7 +95,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, "", ""
+            $this->firefly_account_id, $this->firefly_accounts, "", "", []
         );
 
         $this->assertEquals($expected, $actual);
@@ -129,7 +129,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, "", ""
+            $this->firefly_account_id, $this->firefly_accounts, "", "", []
         );
 
         $this->assertEquals($expected, $actual);
@@ -161,7 +161,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, "", ""
+            $this->firefly_account_id, $this->firefly_accounts, "", "", []
         );
 
         $this->assertEquals($expected, $actual);
@@ -193,7 +193,7 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, "", ""
+            $this->firefly_account_id, $this->firefly_accounts, "", "", []
         );
 
         $this->assertEquals($expected, $actual);
@@ -241,7 +241,11 @@ final class TransactionsToFireflySenderTest extends TestCase
         );
         $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, $configuration->description_regex_match, $configuration->description_regex_replace
+            $this->firefly_account_id,
+            $this->firefly_accounts,
+            $configuration->description_regex_match,
+            $configuration->description_regex_replace,
+            []
         );
 
         $this->assertEquals($expected, $actual);
@@ -260,13 +264,49 @@ final class TransactionsToFireflySenderTest extends TestCase
         $regex_match = '/^(Übertrag \/ Überweisung|Lastschrift \/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\..*)$'; // not a valid PHP regex, missing / at the end
         $regex_replace = '$2 [$1 | $3 | $4]';
 
-        set_error_handler(function() { /* ignore errors */ }); // required to suppress E_WARNING from preg_replace and test for an exception being thrown
-        $this->expectException(Exception::class);
-        $actual   = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
+        $actual = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
             $transaction,
-            $this->firefly_account_id, $this->firefly_accounts, $regex_match, $regex_replace
+            $this->firefly_account_id,
+            $this->firefly_accounts,
+            $regex_match,
+            $regex_replace,
+            []
         );
-        restore_error_handler();
+        $this->assertNotEmpty($actual['transactions'][0]['description']);
+    }
+
+    public function test_transaction_processing_multiple_rules()
+    {
+        $transaction = new Transaction;
+        $transaction->setAccountNumber($this->valid_iban);
+        $transaction->setCreditDebit(Transaction::CD_DEBIT);
+        $transaction->setValutaDate(new DateTime('2026-03-17'));
+        $transaction->setAmount(50.00);
+        $transaction->setName('Bank Service');
+        $transaction->setStructuredDescription(array('SVWZ' => 'GUTSCHR. UEBERW. DAUERAUFTR'));
+
+        $rules = [
+            [
+                'from' => '/^GUTSCHR\. UEBERW\. /i', 
+                'to'   => ''
+            ],
+            [
+                'from' => 'DAUERAUFTR', 
+                'to'   => 'DAUERAUFTRAG'
+            ]
+        ];
+        $expected_description = 'DAUERAUFTRAG';
+
+        $actual = TransactionsToFireflySender::transform_transaction_to_firefly_request_body(
+            $transaction,
+            $this->firefly_account_id, 
+            $this->firefly_accounts, 
+            "",
+            "",
+            $rules
+        );
+
+        $this->assertEquals($expected_description, $actual['transactions'][0]['description']);
     }
 
 }

@@ -40,27 +40,28 @@ function CollectData()
             return;
         }
 
-        $session->set('bank_username',           $configuration->bank_username);
-        $session->set('bank_password',           $configuration->bank_password);
-        $session->set('bank_url',                $configuration->bank_url);
-        $session->set('bank_code',               $configuration->bank_code);
-        $session->set('bank_2fa',                $configuration->bank_2fa);
+        $session->set('bank_username', $configuration->bank_username);
+        $session->set('bank_password', $configuration->bank_password);
+        $session->set('bank_url', $configuration->bank_url);
+        $session->set('bank_code', $configuration->bank_code);
+        $session->set('bank_2fa', $configuration->bank_2fa);
         if($configuration->bank_2fa_device) {
-            $session->set('bank_2fa_device',         $configuration->bank_2fa_device);
+            $session->set('bank_2fa_device', $configuration->bank_2fa_device);
         }
         if($configuration->bank_fints_persistence) {
             $session->set('fints_persistence',   $configuration->bank_fints_persistence);
         }
-        $session->set('firefly_url',             $configuration->firefly_url);
-        $session->set('firefly_access_token',    $configuration->firefly_access_token);
+        $session->set('firefly_url', $configuration->firefly_url);
+        $session->set('firefly_access_token', $configuration->firefly_access_token);
         $session->set('skip_transaction_review', $configuration->skip_transaction_review);
-        $session->set('bank_account_iban' ,      $configuration->bank_account_iban);
-        $session->set('firefly_account_id',      $configuration->firefly_account_id);
-        $session->set('choose_account_from' ,    $configuration->choose_account_from);
-        $session->set('choose_account_to',       $configuration->choose_account_to);
+        $session->set('bank_account_iban', $configuration->bank_account_iban);
+        $session->set('firefly_account_id', $configuration->firefly_account_id);
+        $session->set('choose_account_from', $configuration->choose_account_from);
+        $session->set('choose_account_to', $configuration->choose_account_to);
         $session->set('description_regex_match', $configuration->description_regex_match);
         $session->set('description_regex_replace', $configuration->description_regex_replace);
-        $session->set('force_mt940',             $configuration->force_mt940);
+        $session->set('description_replacement_rules', $configuration->description_replacement_rules);
+        $session->set('force_mt940', $configuration->force_mt940);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);

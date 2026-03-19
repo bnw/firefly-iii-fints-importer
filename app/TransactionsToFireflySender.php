@@ -50,7 +50,9 @@ class TransactionsToFireflySender
         Transaction $transaction,
         int $firefly_account_id,
         GetAccountsResponse $firefly_accounts,
-        string $regex_match, string $regex_replace
+        string $regex_match,
+        string $regex_replace,
+        array $regex_rules = []
     )
     {
         $debitOrCredit = $transaction->getCreditDebit();
@@ -87,24 +89,54 @@ class TransactionsToFireflySender
         }
         $firefly_accounts->rewind();
 
-        $description = $transaction->getMainDescription();
-        if ($description == "") {
-            $description = $transaction->getBookingText();
-        }
+        // Get initial description from transaction
+        $description = $transaction->getMainDescription() ?: $transaction->getBookingText() ?: $transaction->getDescription1() ?: "";
 
-        if ($description == "") {
-            $description = $transaction->getDescription1();
-        }
+        // Apply transformation rules
+        if (!empty($description)) {
+            
+            // Priority: regex_match/replace (legacy) takes precedence if provided, 
+            // otherwise use the new multiple rules array.
+            if (!empty($regex_match) && !empty($regex_replace)) {
+                $activeRules = [['from' => $regex_match, 'to' => $regex_replace]];
+            } else {
+                $activeRules = $regex_rules;
+            }
+            
+            foreach ($activeRules as $rule) {
+                $from = $rule['from'] ?? '';
+                $to   = $rule['to'] ?? '';
+                
+                if ($from === '') continue;
 
-        if (!empty($regex_match) && !empty($regex_replace) && !empty($description)) {
-            $result = preg_replace($regex_match, $regex_replace, $description);
-            if ($result !== null) {
-                $description = $result;
+                // Check if it's a Regex (starts/ends with same non-alphanumeric delimiter)
+                $is_regex = preg_match('/^([^\w\s]).*?\1[imsxuADU]*$/', $from);
+
+                if ($is_regex) {
+                    $result = @preg_replace($from, $to, $description);
+                    if ($result !== null) {
+                        if ($result !== $description) {
+                            Logger::debug("Regex replacement applied: '$description' -> '$result'");
+                            $description = $result;
+                        }
+                    } elseif (preg_last_error() !== PREG_NO_ERROR) {
+                        Logger::error("Invalid Regex pattern or error: '$from' (Error code: " . preg_last_error() . ")");
+                    }
+                } else {
+                    $old_description = $description;
+                    $description = str_ireplace($from, $to, $description);
+                    if ($old_description !== $description) {
+                        Logger::debug("String replacement applied: '$old_description' -> '$description'");
+                    }
+                }
+
+                if (empty($description)) break;
             }
         }
 
-        if($description == null) {
-            throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
+        // Final safety check
+        if ($description === null) {
+             throw new \Exception("Error in description transformation!");
         }
 
         // Get currency code from structured description (set by CAMT parser)
