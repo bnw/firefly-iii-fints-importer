@@ -76,7 +76,7 @@ class StatementOfAccountHelper
                     $currencyCode = $currency->getCode();
 
                     // Get transaction details (first detail if multiple exist)
-                    $detail = $entry->getTransactionDetail();
+                    $detail = implode(' ', $entry->getTransactionDetails());
 
                     if ($detail) {
                         // Find the correct counterparty based on credit/debit direction
