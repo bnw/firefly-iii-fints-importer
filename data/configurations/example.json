@@ -21,5 +21,11 @@
     "__from_to_comment__": "The following values will be passed directly into DateTime. Set them to null to choose them manually during import process.",
     "from": "now - 7 days",
     "to": "now"
-  }
+  },
+  "exclude_regex_matchers": [
+    "/Example matcher that will most likely never match/"
+  ],
+  "exclude_ibans": [
+    "DE12345678909876543210"
+  ]
 }

@@ -5,7 +5,40 @@ use App\FinTsFactory;
 use App\Logger;
 use App\Step;
 use App\TanHandler;
+use Fhp\Model\StatementOfAccount\Transaction;
 use Fhp\Protocol\UnexpectedResponseException;
+
+// ExtTransactions to show if a transaction is excluded in frontend
+class ExtTransaction extends Transaction {
+    protected string $excluded;
+
+    public function __construct(Transaction $base) {
+        // Kopiere alle Eigenschaften vom Original ins neue Objekt
+        foreach (get_object_vars($base) as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    public function isExcluded(): bool
+    {
+        if ($this->excluded) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getExcluded(): string
+    {
+        return $this->excluded;
+    }
+
+    public function setExcluded(string $excluded): static
+    {
+        $this->excluded = $excluded;
+        return $this;
+    }
+}
 
 function GetImportData()
 {
@@ -25,6 +58,9 @@ function GetImportData()
         $statement_format = $session->get('statement_format', 'camt');
     }
     Logger::info("Using statement format: {$statement_format}");
+
+    $exclude_regex_matchers = $session->get('exclude_regex_matchers', []);
+    $exclude_ibans = $session->get('exclude_ibans', []);
 
     try {
         $soa_handler = new TanHandler(
@@ -91,6 +127,37 @@ function GetImportData()
                 Logger::info("No transactions found for date range: {$date_from} to {$date_to}");
             }
 
+            $ext_transactions = [];
+            foreach ($transactions as $key => $transaction) {
+                $ext_transaction = new ExtTransaction($transaction);
+                $ext_transaction->setExcluded(False);
+
+                if ($ext_transaction->isExcluded() == false) {
+                    $acc_number = $transaction->getAccountNumber();
+                    foreach ($exclude_ibans as $exclude_iban) {
+                        if ($exclude_iban === $acc_number) {
+                            Logger::trace("Exclude IBAN found: {$exclude_iban}. This transaction will not be sent");
+                            unset($transactions[$key]);
+                            $ext_transaction->setExcluded("IBAN: " . $exclude_iban);
+                            break;
+                        }
+                    }
+                }
+
+                if ($ext_transaction->isExcluded() == false) {
+                    $desc = $transaction->getMainDescription();
+                    foreach ($exclude_regex_matchers as $exclude_regex_matcher) {
+                        if (preg_match($exclude_regex_matcher, $desc)) {
+                            Logger::trace("Exclude match found: {$exclude_regex_matcher} <-> {$desc}. This transaction will not be sent");
+                            unset($transactions[$key]);
+                            $ext_transaction->setExcluded("Pattern: " . $exclude_regex_matcher);
+                            break;
+                        }
+                    }
+                }
+                $ext_transactions[] = $ext_transaction;
+            }
+
             // Clear fallback flag on success
             $session->remove('use_mt940_format');
 
@@ -108,7 +175,7 @@ function GetImportData()
             echo $twig->render(
                 'show-transactions.twig',
                 array(
-                    'transactions' => $transactions,
+                    'transactions' => $ext_transactions,
                     'next_step' => $next_step,
                     'skip_transaction_review' => $session->get('skip_transaction_review')
                 )
