@@ -2,3 +2,4 @@ vendor
 data
 !data/configurations/example.json
 .idea
+.DS_Store

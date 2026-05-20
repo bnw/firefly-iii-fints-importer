@@ -56,7 +56,8 @@ class TransactionsToFireflySender
         $debitOrCredit = $transaction->getCreditDebit();
         $amount        = $transaction->getAmount();
         $source        = array('id' => $firefly_account_id);
-        $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
+        $rawName       = $transaction->getName();
+        $destination   = array('iban' => self::get_iban($transaction), 'name' => ($rawName !== '') ? $rawName : null);
 
         Logger::trace("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
 
@@ -123,7 +124,10 @@ class TransactionsToFireflySender
             'source_iban' => $source['iban'] ?? null,
             'destination_name' => $destination['name'] ?? null,
             'destination_id' => $destination['id'] ?? null,
-            'destination_iban' => $destination['iban'] ?? null,
+            // Don't send destination_iban for withdrawals: card transactions share one IBAN
+            // (the card account), causing Firefly to merge all merchants into one expense account.
+            // For deposits and transfers destination_id is used instead, so iban is irrelevant.
+            'destination_iban' => ($type === TransactionType::WITHDRAWAL) ? null : ($destination['iban'] ?? null),
             'sepa_ct_id' => $transaction->getEndToEndID() ?: null,
             'notes' => $structuredDesc['ABWA'] ?? $destination['name'] ?? null,
         ], fn($value) => $value !== null);
