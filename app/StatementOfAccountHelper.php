@@ -43,6 +43,7 @@ class StatementOfAccountHelper
                 foreach ($record->getEntries() as $entry) {
                     // Create a new Transaction object
                     $transaction = new Transaction();
+                    $transaction->setName('');
 
                     // Set credit/debit indicator
                     $cdIndicator = $entry->getCreditDebitIndicator();
@@ -115,11 +116,7 @@ class StatementOfAccountHelper
 
                         // Set counterparty name
                         if ($relatedParty && $relatedParty->getRelatedPartyType()) {
-                            $partyType = $relatedParty->getRelatedPartyType();
-                            $name = $partyType->getName();
-                            if ($name) {
-                                $transaction->setName($name);
-                            }
+                            $transaction->setName($relatedParty->getRelatedPartyType()->getName() ?? '');
                         }
 
                         // Handle single-party transactions where bank only provides one party (yourself)
