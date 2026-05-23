@@ -145,9 +145,13 @@ class StatementOfAccountHelper
 
                         $remittanceInfo = $detail->getRemittanceInformation();
                         if ($remittanceInfo) {
-                            $message = $remittanceInfo->getMessage();
+                            $message = '';
+                            $unstructuredBlocks = $detail->getRemittanceInformation()->getUnstructuredBlocks();
+                            foreach ($unstructuredBlocks as $block) {
+                                $message = $message . ' ' . $block->getMessage();
+                            }
                             if ($message) {
-                                $structuredDesc['SVWZ'] = $message;
+                                $structuredDesc['SVWZ'] = trim($message);
                             }
                         }
 
@@ -175,7 +179,11 @@ class StatementOfAccountHelper
                     }
 
                     // Add currency code to structured description (always set, even without detail)
-                    $existingDesc = $transaction->getStructuredDescription() ?? [];
+                    try {
+                        $existingDesc = $transaction->getStructuredDescription() ?? [];
+                    } catch (\Error $e) {
+                        $existingDesc = [];
+                    }
                     $existingDesc['CURR'] = $currencyCode;
                     $transaction->setStructuredDescription($existingDesc);
 
@@ -185,28 +193,10 @@ class StatementOfAccountHelper
                         $transaction->setBookingText($additionalInfo);
                     }
 
-                    // Set description1 as additional fallback (use counterparty name or additional info)
-                    $description1 = '';
-                    if ($detail && $detail->getRemittanceInformation()) {
-                        // Try to get unstructured remittance info blocks as fallback
-                        $unstructuredBlocks = $detail->getRemittanceInformation()->getUnstructuredBlocks();
-                        if (!empty($unstructuredBlocks)) {
-                            $description1 = $unstructuredBlocks[0]->getMessage();
-                        }
-                    }
-                    if (empty($description1) && $additionalInfo) {
-                        $description1 = $additionalInfo;
-                    }
-                    if (!empty($description1)) {
-                        $transaction->setDescription1($description1);
-                    }
-
                     $transactions[] = $transaction;
                 }
             }
-
             return $transactions;
-
         } catch (\Exception | \Error $e) {
             // Log the error and return empty array to prevent fatal errors
             Logger::error("CAMT XML parsing failed: " . $e->getMessage());
