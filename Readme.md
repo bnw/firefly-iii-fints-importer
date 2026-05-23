@@ -97,3 +97,4 @@ Bank specifics
   * *Note: this will not lead to your account being blocked due to too many attempts as you do not attempt a login funnily enough*
 * For Targobank, if your transactions are having [unhelpful descriptions](https://github.com/bnw/firefly-iii-fints-importer/pull/201), try setting `force_mt940=true` (only available in the configuration file, not the GUI). This will use a different API to retrieve your transactions that does not have this problem.
 * For Comdirect, if your import is not showing any transactions, this might be related [to an API issue on their side](https://github.com/bnw/firefly-iii-fints-importer/issues/199). For now, you can set `force_mt940=true` (only available in the configuration file, not the GUI). This will use a different API to retrieve your transactions that does not have this problem.
+* DKB headless import [does not work](https://github.com/bnw/firefly-iii-fints-importer/issues/230#issue-4412173445)
