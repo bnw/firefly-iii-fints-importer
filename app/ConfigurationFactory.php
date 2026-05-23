@@ -3,6 +3,18 @@
 
 namespace App;
 
+class EmailConfig {
+    public $enabled;
+    public $host;
+    public $port;
+    public $smtp_secure;
+    public $username;
+    public $password;
+    public $from;
+    public $to;
+    public $subject;
+}
+
 class Configuration {
     public $bank_username;
     public $bank_password;
@@ -21,6 +33,7 @@ class Configuration {
     public $description_regex_match;
     public $description_regex_replace;
     public $force_mt940;
+    public $email_config;
 }
 
 class ConfigurationFactory
@@ -57,6 +70,24 @@ class ConfigurationFactory
         $configuration->description_regex_match   = $contentArray["description_regex_match"];
         $configuration->description_regex_replace = $contentArray["description_regex_replace"];
         $configuration->force_mt940               = filter_var($contentArray["force_mt940"] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        $email_config = new EmailConfig();
+        $email_config->enabled = false;
+        if (isset($contentArray["tan_required_email_notification"])) {
+            $email_config->host        = $contentArray["tan_required_email_notification"]["host"];
+            $email_config->port        = $contentArray["tan_required_email_notification"]["port"];
+            $email_config->smtp_secure = $contentArray["tan_required_email_notification"]["smtp_secure"];
+            $email_config->username    = $contentArray["tan_required_email_notification"]["username"];
+            $email_config->password    = $contentArray["tan_required_email_notification"]["password"];
+            $email_config->from        = $contentArray["tan_required_email_notification"]["from"];
+            $email_config->to          = $contentArray["tan_required_email_notification"]["to"];
+            $email_config->subject     = $contentArray["tan_required_email_notification"]["subject"];
+            $email_config->enabled = !empty($email_config->host) && !empty($email_config->port) &&
+                                     !empty($email_config->smtp_secure) && !empty($email_config->username) &&
+                                     !empty($email_config->password) && !empty($email_config->from) &&
+                                     !empty($email_config->to) && !empty($email_config->subject);
+        }
+        $configuration->email_config = $email_config;
 
         return $configuration;
     }
