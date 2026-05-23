@@ -35,6 +35,9 @@
                 </strong>
                 {% if transaction.getCreditDebit == 'debit' %}to{% else %}from{% endif %}
                 {{ transaction.getName() }}
+                <strong>
+                {% if transaction.isExcluded %} Excluded by {{ transaction.getExcluded }} {% endif %}
+                </strong>
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
