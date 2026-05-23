@@ -119,7 +119,11 @@ class StatementOfAccountHelper
                             $name = $partyType->getName();
                             if ($name) {
                                 $transaction->setName($name);
+                            } else {
+                                $transaction->setName("");
                             }
+                        } else {
+                            $transaction->setName("");
                         }
 
                         // Handle single-party transactions where bank only provides one party (yourself)
