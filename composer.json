@@ -9,7 +9,8 @@
     "phpseclib/bcmath_compat": "*",
     "ext-json": "*",
     "globalcitizen/php-iban": "^4.2",
-    "genkgo/camt": "^2.0"
+    "genkgo/camt": "^2.0",
+    "justinrainbow/json-schema": "^6.7"
   },
   "autoload": {
     "psr-4": {
