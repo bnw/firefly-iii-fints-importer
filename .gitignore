@@ -2,3 +2,10 @@ vendor
 data
 !data/configurations/example.json
 .idea
+
+# Local test runner for our docker-based test environment (not part of bnw's official tooling)
+/run-tests.sh
+
+# Artifact left by tests/TransactionsToFireflySenderTest.php (pre-existing baseline issue, unrelated to this fix)
+/test_example.json
+
