@@ -37,8 +37,22 @@ class TanHandler
             $this->action = unserialize($this->session->get($this->action_id));
             $this->session->remove($this->action_id);
             if ($this->fin_ts->getSelectedTanMode()->isDecoupled()) {
-                if ($this->action->getTanRequest() != null && !$this->fin_ts->checkDecoupledSubmission($this->action)) {
-                    $this->action = ($this->create_action_lambda)();
+                if ($this->action->getTanRequest() != null) {
+                    // For decoupled TAN modes (e.g. DKB pushTAN 940), the
+                    // user confirms the TAN in their bank's mobile app.
+                    // checkDecoupledSubmission() polls the bank for the
+                    // confirmation, advances the action's state in place,
+                    // and returns true once the confirmation has arrived.
+                    //
+                    // Critically, we must NOT re-create the action via
+                    // create_action_lambda here if it's still pending — that
+                    // would call $fin_ts->login() again and generate a
+                    // brand-new TAN challenge at the bank, leading to
+                    // rate-limit lockouts (e.g. DKB error 9040
+                    // "Authorization method is locked because too many
+                    // challenges were requested"). See bnw#230, #227, #183
+                    // and phpFinTS#535 for the canonical resolution.
+                    $this->fin_ts->checkDecoupledSubmission($this->action);
                 }
             } else {
                 $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
