@@ -21,6 +21,7 @@ class Configuration {
     public $description_regex_match;
     public $description_regex_replace;
     public $force_mt940;
+    public $add_import_tag;
 }
 
 class ConfigurationFactory
@@ -57,6 +58,7 @@ class ConfigurationFactory
         $configuration->description_regex_match   = $contentArray["description_regex_match"];
         $configuration->description_regex_replace = $contentArray["description_regex_replace"];
         $configuration->force_mt940               = filter_var($contentArray["force_mt940"] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $configuration->add_import_tag            = filter_var($contentArray["add_import_tag"] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         return $configuration;
     }

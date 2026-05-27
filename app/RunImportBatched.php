@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 $num_transactions_to_import_at_once = 5;
 
 
-function RunImport($transactions)
+function RunImport($transactions): array
 {
     global $session, $num_transactions_to_import_at_once;
 
@@ -21,10 +21,38 @@ function RunImport($transactions)
         $session->get('description_regex_replace', "")
     );
     $result = $sender->send_transactions();
-    if (is_array($result)) {
-        return $result;
+
+    if ($session->get('add_import_tag', false) && !empty($result['group_ids'])) {
+        $existing = $session->has('imported_group_ids')
+            ? (unserialize($session->get('imported_group_ids')) ?: array())
+            : array();
+        $session->set('imported_group_ids', serialize($existing + $result['group_ids']));
     }
-    return array();
+
+    // Note: send_transactions() returns ['errors'=>[], 'group_ids'=>[]].
+    // Only errors are returned here; callers (RunImportStep) expect a flat error array.
+    // Do not change this to return the full $result — it would corrupt import_messages.
+    return $result['errors'];
+}
+
+function ApplyImportTag(): void
+{
+    global $session;
+
+    if (!$session->get('add_import_tag', false)) {
+        return;
+    }
+
+    $group_ids = $session->has('imported_group_ids')
+        ? (unserialize($session->get('imported_group_ids')) ?: array())
+        : array();
+
+    $tagger = new \App\PostImportTagger(
+        $session->get('firefly_url'),
+        $session->get('firefly_access_token'),
+        $session->get('import_tag_name', 'FinTS Import ' . date('Y-m-d @ H:i'))
+    );
+    $tagger->apply($group_ids);
 }
 
 function RunImportStep($transactions, $start_index)
@@ -48,6 +76,7 @@ function RunImportWithJS()
     $num_transactions_processed  = $session->get('num_transactions_processed');
     $import_messages             = unserialize($session->get('import_messages'));
     if ($num_transactions_processed >= count($transactions)) {
+        ApplyImportTag();
         echo $twig->render(
             'done.twig',
             array(
@@ -98,6 +127,7 @@ function RunImportWithoutJS()
             $import_messages = array_merge($import_messages, $result);
         }
     }
+    ApplyImportTag();
     echo $twig->render(
         'done.twig',
         array(
@@ -111,7 +141,12 @@ function RunImportWithoutJS()
 
 function RunImportBatched()
 {
-    global $automate_without_js;
+    global $session, $automate_without_js;
+
+    // Generate tag name once at the start of this import run
+    if ($session->get('add_import_tag', false) && !$session->has('import_tag_name')) {
+        $session->set('import_tag_name', 'FinTS Import ' . date('Y-m-d @ H:i'));
+    }
 
     if ($automate_without_js) {
         return RunImportWithoutJS();
