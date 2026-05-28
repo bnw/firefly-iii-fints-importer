@@ -3,7 +3,7 @@
 {% block title %}Error{% endblock %}
 
 {% block content %}
-    <h1>{{ error_header }}</h1>
+    <h1>{{ error_header|default('Unbekannter Fehler') }}</h1>
 
-    <p>{{ error_message|nl2br }}</p>
+    <p>{{ message|default('Bitte versuche es später erneut.') }}</p>
 {% endblock %}
