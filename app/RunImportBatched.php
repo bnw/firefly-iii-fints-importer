@@ -1,6 +1,7 @@
 <?php
 namespace App\StepFunction;
 
+use App\ConfigurationFactory;
 use App\TransactionsToFireflySender;
 use App\Step;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -48,12 +49,15 @@ function RunImportWithJS()
     $num_transactions_processed  = $session->get('num_transactions_processed');
     $import_messages             = unserialize($session->get('import_messages'));
     if ($num_transactions_processed >= count($transactions)) {
+        $fintsPersistence = base64_encode($session->get('persistedFints'));
+        $autoSaveStatus   = try_save_persistence($session, $fintsPersistence);
         echo $twig->render(
             'done.twig',
             array(
                 'import_messages' => $import_messages,
                 'total_num_transactions' => count($transactions),
-                'fints_persistence' => base64_encode($session->get('persistedFints'))
+                'fints_persistence' => $fintsPersistence,
+                'auto_save_status' => $autoSaveStatus
             )
         );
         $session->invalidate();
@@ -98,15 +102,49 @@ function RunImportWithoutJS()
             $import_messages = array_merge($import_messages, $result);
         }
     }
+    $fintsPersistence = base64_encode($session->get('persistedFints'));
+    $autoSaveStatus   = try_save_persistence($session, $fintsPersistence);
     echo $twig->render(
         'done.twig',
         array(
             'import_messages' => $import_messages,
-            'total_num_transactions' => count($transactions)
+            'total_num_transactions' => count($transactions),
+            'fints_persistence' => $fintsPersistence,
+            'auto_save_status' => $autoSaveStatus
         )
     );
     $session->invalidate();
     return Step::DONE;
+}
+
+/**
+ * If the user loaded a configuration file at the start of this run
+ * (Setup.php stored the resolved path in the session), try to write the
+ * fresh FinTS persistence blob back into that file. Returns null when no
+ * config file is known (fresh interactive run), an array with ok=true on
+ * success, or ok=false with the error message on failure.
+ *
+ * This is the fix for the truncation UX bug: rendering a 17 KB base64 blob
+ * inside <pre> and asking the user to copy/paste it into JSON reliably
+ * returns a TRUNCATED string from the browser selection, which then breaks
+ * subsequent phpFinTS unserialize.
+ */
+function try_save_persistence($session, $base64String)
+{
+    if (!$session->has('configurationFileName')) {
+        return null;
+    }
+    $fileName = $session->get('configurationFileName');
+    try {
+        ConfigurationFactory::save_persistence_to_file($fileName, $base64String);
+        return array('ok' => true, 'fileName' => basename($fileName));
+    } catch (\Throwable $e) {
+        return array(
+            'ok'       => false,
+            'fileName' => basename($fileName),
+            'error'    => $e->getMessage(),
+        );
+    }
 }
 
 function RunImportBatched()

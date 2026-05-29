@@ -5,7 +5,7 @@ use App\Step;
 
 function Setup()
 {
-    global $twig, $automate_without_js, $request;
+    global $twig, $automate_without_js, $request, $session;
 
     $requested_config_file = '';
 
@@ -22,6 +22,12 @@ function Setup()
             );
             return;
         }
+
+        // Remember the resolved configuration file path so later steps can
+        // write back updated values (e.g. the refreshed FinTS persistence)
+        // without requiring the user to manually copy a 17 KB blob out of
+        // a Bootstrap <pre>.
+        $session->set('configurationFileName', $requested_config_file);
 
         if ($automate_without_js)
         {

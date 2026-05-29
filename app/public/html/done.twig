@@ -9,10 +9,70 @@
 
     <p>
         You had to grant access to this importer using your TAN-mode.
-        To use this granted access on subsequent imports, you can use this persistence string.
-        It should be treated as a secret and can be used on the json configuration file.
-        <pre>{{ fints_persistence }}</pre>
+        To use this granted access on subsequent imports, the value below is the persistence string.
+        It should be treated as a secret and is stored under <code>bank_fints_persistence</code>
+        in your configuration JSON.
     </p>
+
+    {% if auto_save_status is not null and auto_save_status.ok %}
+        <div class="alert alert-success">
+            Persistence automatically saved to <code>{{ auto_save_status.fileName }}</code>.
+            No manual action needed for the next import.
+        </div>
+        <details>
+            <summary>Show persistence value (optional, for manual backup)</summary>
+            <textarea id="fints-persistence-field" readonly rows="6" cols="80"
+                      style="font-family: monospace; width: 100%; word-break: break-all;">{{ fints_persistence }}</textarea>
+        </details>
+    {% elseif auto_save_status is not null and not auto_save_status.ok %}
+        <div class="alert alert-warning">
+            <strong>Automatic save to <code>{{ auto_save_status.fileName }}</code> failed:</strong>
+            {{ auto_save_status.error }}<br>
+            Please copy the value below into the <code>bank_fints_persistence</code> field of
+            your configuration JSON manually.
+        </div>
+        <textarea id="fints-persistence-field" readonly rows="6" cols="80"
+                  style="font-family: monospace; width: 100%; word-break: break-all;">{{ fints_persistence }}</textarea>
+        <p>
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="copyFintsPersistence()">Copy to clipboard</button>
+            <span id="fints-persistence-copied" style="display:none; margin-left: 1em; color: green;">Copied!</span>
+        </p>
+    {% else %}
+        <p>
+            No configuration file was loaded for this run, so the persistence value cannot be
+            auto-saved. Copy it into the <code>bank_fints_persistence</code> field of your
+            configuration JSON before the next import.
+        </p>
+        <textarea id="fints-persistence-field" readonly rows="6" cols="80"
+                  style="font-family: monospace; width: 100%; word-break: break-all;">{{ fints_persistence }}</textarea>
+        <p>
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="copyFintsPersistence()">Copy to clipboard</button>
+            <span id="fints-persistence-copied" style="display:none; margin-left: 1em; color: green;">Copied!</span>
+        </p>
+    {% endif %}
+
+    <script>
+        function copyFintsPersistence() {
+            var field = document.getElementById('fints-persistence-field');
+            if (!field) return;
+            var toast = document.getElementById('fints-persistence-copied');
+            var showToast = function () {
+                if (!toast) return;
+                toast.style.display = 'inline';
+                setTimeout(function () { toast.style.display = 'none'; }, 2000);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(field.value).then(showToast);
+            } else {
+                // Fallback for older browsers.
+                field.select();
+                document.execCommand('copy');
+                showToast();
+            }
+        }
+    </script>
 
     {% if import_messages is not empty %}
         <div class="alert alert-warning">
@@ -20,7 +80,7 @@
             These transactions were most likely not imported.
         </div>
     {% endif %}
-    
+
     <ul class="list-unstyled">
         {% for message in import_messages %}
             <li class="mb-3">
@@ -44,6 +104,6 @@
             </li>
         {% endfor %}
     </ul>
-    
+
     <p><a href="/" class="btn btn-primary">Go back to start</a></p>
 {% endblock %}
