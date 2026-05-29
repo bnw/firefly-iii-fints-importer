@@ -213,6 +213,24 @@ final class ConfigurationFactorySavePersistenceTest extends TestCase
             'saving the same value twice must produce byte-identical files (no whitespace drift, no key reordering)');
     }
 
+    public function test_save_preserves_existing_file_permissions()
+    {
+        $this->writeFixture();
+        // Operators sometimes chmod the config to 0600 because it holds
+        // plaintext bank_password + firefly_access_token. The atomic
+        // rename must NOT bump perms back up to the process umask default.
+        chmod($this->fixtureFile, 0600);
+
+        ConfigurationFactory::save_persistence_to_file(
+            $this->fixtureFile,
+            base64_encode('perm-preservation-test')
+        );
+
+        $perms = fileperms($this->fixtureFile) & 0777;
+        $this->assertSame(0600, $perms,
+            sprintf('expected 0600 (preserved), got 0%o', $perms));
+    }
+
     public function test_empty_persistence_explicitly_clears()
     {
         $this->writeFixture(['bank_fints_persistence' => base64_encode('previously-set')]);

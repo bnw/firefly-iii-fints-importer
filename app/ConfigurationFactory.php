@@ -119,6 +119,16 @@ class ConfigurationFactory
             );
         }
 
+        // Preserve the existing file's permissions across the atomic rename.
+        // Config files often hold plaintext bank credentials + Firefly tokens,
+        // and operators may chmod them to 0600. file_put_contents on the .tmp
+        // uses the process umask (typically 0644); without this chmod the
+        // rename would silently relax those permissions.
+        $origPerms = @fileperms($fileName);
+        if ($origPerms !== false) {
+            @chmod($tmp, $origPerms & 0777);
+        }
+
         if (!rename($tmp, $fileName)) {
             // Best-effort cleanup; don't mask the original error.
             @unlink($tmp);
