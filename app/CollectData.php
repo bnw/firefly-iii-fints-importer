@@ -18,7 +18,15 @@ function CollectData()
                 'next_step' => Step::STEP1p5_CHOOSE_2FA_DEVICE
             ));
     } else {
+        // bnw#236 follow-up: Setup.php stashed the config-file path here so
+        // RunImportBatched can write the refreshed persistence back to it
+        // after the import. invalidate() below wipes the whole session — so
+        // capture the value and restore it right after.
+        $savedConfigurationFileName = $session->get('configurationFileName');
         $session->invalidate();
+        if ($savedConfigurationFileName) {
+            $session->set('configurationFileName', $savedConfigurationFileName);
+        }
 
         $filename = $request->request->get('data_collect_mode');
         $configuration = ConfigurationFactory::load_from_file($filename);
