@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "bank_username": { "type": "string", "minLength": 1 },
+    "bank_password": { "type": "string", "minLength": 1 },
+    "bank_url": { "type": "string", "format": "uri" },
+    "skip_transaction_review": { "type": "boolean" }
+  },
+  "required": ["bank_username", "bank_password", "bank_url", "firefly_url", "firefly_access_token", "skip_transaction_review"]
+}

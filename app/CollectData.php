@@ -20,8 +20,19 @@ function CollectData()
     } else {
         $session->invalidate();
 
-        $filename = $request->request->get('data_collect_mode');
-        $configuration = ConfigurationFactory::load_from_file($filename);
+        try {
+            $filename = $request->request->get('data_collect_mode');
+            $configuration = ConfigurationFactory::load_from_file($filename);
+        } catch (\Exception $e) {
+            echo $twig->render(
+                'error.twig',
+                array(
+                    'error_header'  => 'Configuration Error',
+                    'error_message' => $e->getMessage()
+                )
+            );
+            exit;
+        }
 
         if ($request->request->has('bank_username')) {
             $configuration->bank_username = $request->request->get('bank_username');
