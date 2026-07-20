@@ -55,8 +55,21 @@ class TanHandler
 
     public function pose_and_render_tan_challenge(): void
     {
+        global $automate_without_js;
+
         assert($this->needs_tan());
         $tanRequest = $this->action->getTanRequest();
+
+        // Single chokepoint for every TAN challenge (list accounts, login, import).
+        // A headless run cannot answer a TAN — the FinTS session lives only in this
+        // process — so report it as a failure that an automation can act on.
+        if ($automate_without_js) {
+            \App\AutomateStatus::fail(
+                'tan_required',
+                'TAN required',
+                (string)$tanRequest->getChallenge()
+            );
+        }
         if ($tanRequest->getChallengeHhdUc()) {
             try {
                 $challengeImage    = new \Fhp\Model\TanRequestChallengeImage(

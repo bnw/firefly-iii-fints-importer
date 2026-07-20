@@ -68,6 +68,33 @@ This importer can be used without a browser (e.g. by using `curl` or `wget`). Fo
 Additionally, make sure that you filled out the `choose_account_automation` part in the config.  
 Thanks to [Bur0k](https://github.com/Bur0k) for this feature!
 
+### Machine-readable status
+
+In `automate=true` mode the importer sets an **HTTP status code** so a script can tell a
+successful run apart from a failed one without scraping the HTML:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Import finished (see `transactions` for how many were sent) |
+| `404` | Configuration file not found |
+| `409` | A TAN is required, or the TAN device is ambiguous — needs manual action |
+| `422` | The configured IBAN / Firefly account id could not be verified |
+| `500` | Importer error, or the run stalled at an interactive step |
+
+A run that stops at an interactive page (TAN prompt, device picker) is reported as a failure
+(`409`/`500`) rather than a misleading `200`, so silent stalls surface. With `curl` use `-f`
+to turn a non-2xx status into a non-zero exit code.
+
+Add `&format=json` to get a small JSON body instead of HTML:
+
+```
+curl -sf 'http://localhost:8080/?automate=true&config=example.json&format=json'
+{"status":"ok","transactions":12,"error_header":null,"error_message":null}
+```
+
+Without `format=json` the HTML body is unchanged from before — only the status code is added,
+so existing crons keep working (and start noticing failures they previously missed).
+
 
 Feedback
 --------

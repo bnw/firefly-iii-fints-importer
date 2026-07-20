@@ -98,6 +98,7 @@ function RunImportWithoutJS()
             $import_messages = array_merge($import_messages, $result);
         }
     }
+    \App\AutomateStatus::success(count($transactions));
     echo $twig->render(
         'done.twig',
         array(

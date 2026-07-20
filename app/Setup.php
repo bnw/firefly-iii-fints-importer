@@ -13,6 +13,13 @@ function Setup()
         $filename = basename($_GET['config']);
         $requested_config_file = 'data/configurations/' . $filename;
         if (!file_exists($requested_config_file)) {
+            if ($automate_without_js) {
+                \App\AutomateStatus::fail(
+                    'config_not_found',
+                    'Could not find the configuration',
+                    'The configuration \'' . $filename . '\' could\'t be found in the directory \'data/configurations/\''
+                );
+            }
             echo $twig->render(
                 'error.twig',
                 array(

@@ -31,6 +31,7 @@ use App\TransactionsToFireflySender;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use App\Step;
+use App\AutomateStatus;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/public/html');
@@ -46,6 +47,25 @@ $session->start();
 
 if (isset($_GET['automate'])) {
     $automate_without_js = $_GET['automate'] == "true";
+}
+
+// In automate mode, buffer all step output so we can set an HTTP status code
+// after the run (the step functions echo Twig output immediately, which would
+// otherwise commit a 200 before we know the outcome). See App\AutomateStatus.
+if ($automate_without_js) {
+    ob_start();
+
+    // Safety net: if the run dies with a fatal error or uncaught exception, the
+    // status-emitting block at the bottom never runs and PHP would flush the
+    // default 200. This shutdown handler runs before the output buffer is
+    // flushed, so it can still turn such a run into a 500.
+    register_shutdown_function(function () {
+        $error = error_get_last();
+        $fatal_types = array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR);
+        if ($error !== null && in_array($error['type'], $fatal_types, true) && !headers_sent()) {
+            http_response_code(500);
+        }
+    });
 }
 
 
@@ -85,3 +105,18 @@ do
             break;
     }
 } while ($current_step != Step::DONE);
+
+// Emit the machine-readable status for automate mode. Without format=json the
+// HTML body is byte-identical to before — only the HTTP status code is added,
+// which fixes existing "curl -f"-style crons rather than breaking them. JSON is
+// strictly opt-in.
+if ($automate_without_js) {
+    $body = ob_get_clean();
+    http_response_code(AutomateStatus::httpCode());
+    if (isset($_GET['format']) && $_GET['format'] === 'json') {
+        header('Content-Type: application/json');
+        echo json_encode(AutomateStatus::payload());
+    } else {
+        echo $body;
+    }
+}

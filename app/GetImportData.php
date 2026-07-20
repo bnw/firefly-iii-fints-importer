@@ -129,6 +129,13 @@ function GetImportData()
             // MT940 also not supported - show error
             Logger::error("Neither CAMT nor MT940 format is supported by this bank");
             $session->remove('use_mt940_format');
+            if ($automate_without_js) {
+                \App\AutomateStatus::fail(
+                    'importer_error',
+                    'Statement Format Not Supported',
+                    'Your bank does not support any statement format implemented in this application (neither CAMT/HICAZS nor MT940/HIKAZS).'
+                );
+            }
             echo $twig->render(
                 'error.twig',
                 array(

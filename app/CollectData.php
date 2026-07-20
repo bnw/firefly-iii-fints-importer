@@ -72,6 +72,17 @@ function CollectData()
             } else {
                 $auto_skip_form = false;
             }
+            if ($automate_without_js) {
+                // Headless run stops here at an interactive device picker with no
+                // error string — the classic silent stall. Report it as a failure.
+                \App\AutomateStatus::fail(
+                    'tan_device_ambiguous',
+                    'Could not resolve bank_2fa_device',
+                    'The bank offers multiple TAN media but the configuration does not '
+                    . 'name one (bank_2fa_device). Set it to one of the device names the '
+                    . 'importer UI lists after login.'
+                );
+            }
             echo $twig->render(
                 'choose-2fa-device.twig',
                 array(

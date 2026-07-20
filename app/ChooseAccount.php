@@ -118,6 +118,9 @@ function ChooseAccount()
                 )
             );
         } else {
+            if ($automate_without_js) {
+                \App\AutomateStatus::fail('verification_failed', 'Failed to verify given Information', $error);
+            }
             echo $twig->render(
                 'error.twig',
                 array(
