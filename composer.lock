@@ -1172,12 +1172,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nemiah/phpFinTS.git",
-                "reference": "d1a75a26b78d2fabc3545442638ba9b81e34d55e"
+                "reference": "751436372724f0a4f2ff28dcd886b48bb03da83e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nemiah/phpFinTS/zipball/d1a75a26b78d2fabc3545442638ba9b81e34d55e",
-                "reference": "d1a75a26b78d2fabc3545442638ba9b81e34d55e",
+                "url": "https://api.github.com/repos/nemiah/phpFinTS/zipball/751436372724f0a4f2ff28dcd886b48bb03da83e",
+                "reference": "751436372724f0a4f2ff28dcd886b48bb03da83e",
                 "shasum": ""
             },
             "require": {
@@ -1199,9 +1199,8 @@
             "default-branch": true,
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "Fhp": "lib/",
-                    "Tests\\Fhp": "lib/"
+                "psr-4": {
+                    "Fhp\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1214,7 +1213,7 @@
                 "issues": "https://github.com/nemiah/phpFinTS/issues",
                 "source": "https://github.com/nemiah/phpFinTS/tree/master"
             },
-            "time": "2025-12-02T10:54:16+00:00"
+            "time": "2026-07-23T15:46:08+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -4946,5 +4945,5 @@
         "ext-json": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
