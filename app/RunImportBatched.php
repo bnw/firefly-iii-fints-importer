@@ -18,7 +18,8 @@ function RunImport($transactions)
         $session->get('firefly_access_token'),
         $session->get('firefly_account'),
         $session->get('description_regex_match', ""),
-        $session->get('description_regex_replace', "")
+        $session->get('description_regex_replace', ""),
+        $session->get('date_regexes', [])
     );
     $result = $sender->send_transactions();
     if (is_array($result)) {

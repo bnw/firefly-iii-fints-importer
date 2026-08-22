@@ -22,7 +22,8 @@ class TransactionsToFireflySender
      */
     public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, 
                                 int $firefly_account_id,
-                                string $regex_match, string $regex_replace)
+                                string $regex_match, string $regex_replace,
+                                array $date_regexes)
     {
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
@@ -30,6 +31,7 @@ class TransactionsToFireflySender
         $this->firefly_account_id   = $firefly_account_id;
         $this->regex_match          = $regex_match;
         $this->regex_replace        = $regex_replace;
+        $this->date_regexes         = $date_regexes;
 
         $firefly_accounts_request = new GetAccountsRequest($this->firefly_url, $this->firefly_access_token);
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
@@ -50,7 +52,7 @@ class TransactionsToFireflySender
         Transaction $transaction,
         int $firefly_account_id,
         GetAccountsResponse $firefly_accounts,
-        string $regex_match, string $regex_replace
+        string $regex_match, string $regex_replace, array $date_regexes
     )
     {
         $debitOrCredit = $transaction->getCreditDebit();
@@ -103,6 +105,25 @@ class TransactionsToFireflySender
             }
         }
 
+        $real_date = null;
+        if (!empty($date_regexes) && !empty($description)) {
+            foreach ($date_regexes as $date_regex) {
+                try {
+                    preg_match($date_regex, $description, $date_parts);
+                    if (
+                        array_key_exists("year",$date_parts) &&
+                        array_key_exists("month",$date_parts) &&
+                        array_key_exists("day",$date_parts)
+                    ) {
+                        $real_date = sprintf("%04d-%02d-%02d", (int)($date_parts["year"]),(int)($date_parts["month"]),(int)($date_parts["day"]));
+                        break;
+                    }
+                } catch (Exception $e) {
+                    
+                }
+            }
+        }
+
         if($description == null) {
             throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
         }
@@ -114,7 +135,7 @@ class TransactionsToFireflySender
         // Build transaction array and filter out null values
         $transactionData = array_filter([
             'type' => $type,
-            'date' => $transaction->getValutaDate()->format('Y-m-d'),
+            'date' => $real_date ?? $transaction->getValutaDate()->format('Y-m-d'),
             'amount' => $amount,
             'description' => $description,
             'currency_code' => $currencyCode,
@@ -142,7 +163,7 @@ class TransactionsToFireflySender
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
             $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
+                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace, $this->date_regexes)
             );
 
             $response = $request->post();
@@ -167,4 +188,5 @@ class TransactionsToFireflySender
     private $firefly_accounts;
     private $regex_match;
     private $regex_replace;
+    private $date_regexes;
 }

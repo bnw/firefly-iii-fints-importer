@@ -22,6 +22,7 @@ function Choose2FADevice()
     $session->set('skip_transaction_review', $request->request->get('skip_transaction_review'));
     $session->set('description_regex_match', $request->request->get('description_regex_match'));
     $session->set('description_regex_replace', $request->request->get('description_regex_replace'));
+    $session->set('date_regexes', $request->request->get('date_regexes'));
     $session->set('force_mt940', $request->request->get('force_mt940'));
     $fin_ts   = FinTsFactory::create_from_session($session);
     $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);
