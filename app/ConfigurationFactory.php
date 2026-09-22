@@ -15,6 +15,7 @@ class Configuration {
     public $firefly_access_token;
     public $skip_transaction_review;
     public $bank_account_iban;
+    public $bank_account_number;
     public $firefly_account_id;
     public $choose_account_from;
     public $choose_account_to;
@@ -44,12 +45,16 @@ class ConfigurationFactory
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
         $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
         if (isset($contentArray["choose_account_automation"])) {
-            $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"];
+            // For a regular bank account, select it by IBAN. Credit card accounts have no IBAN, so
+            // they are selected by their account number instead. Exactly one of the two is expected.
+            $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"] ?? NULL;
+            $configuration->bank_account_number     = $contentArray["choose_account_automation"]["bank_account_number"] ?? NULL;
             $configuration->firefly_account_id      = $contentArray["choose_account_automation"]["firefly_account_id"];
             $configuration->choose_account_from     = $contentArray["choose_account_automation"]["from"];
             $configuration->choose_account_to       = $contentArray["choose_account_automation"]["to"];
         } else {
             $configuration->bank_account_iban = NULL;
+            $configuration->bank_account_number = NULL;
             $configuration->firefly_account_id = NULL;
             $configuration->choose_account_from = NULL;
             $configuration->choose_account_to = NULL;

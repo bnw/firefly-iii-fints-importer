@@ -20,10 +20,8 @@
             <div class="form-group">
                 <label for="bank_account">Bank Account</label>
                 <select class="form-control" name="bank_account" id="bank_account" required>
-                    {% for index, account in bank_accounts %}
-                        <option value="{{ index }}">
-                            {% if account.getIban() %}{{ account.getIban() }} &mdash; {% endif %} {{ account.getSubAccount() }}, {{ account.getAccountNumber() }}
-                        </option>
+                    {% for index, label in account_labels %}
+                        <option value="{{ index }}">{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>

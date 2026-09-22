@@ -46,6 +46,21 @@ Tips
   This can be done by configuring a RegEx search and replace pair. See [data/configurations/example.json](https://github.com/bnw/firefly-iii-fints-importer/blob/master/data/configurations/example.json) or the [corresponding unit test](https://github.com/bnw/firefly-iii-fints-importer/blob/master/tests/TransactionsToFireflySenderTest.php) for an example. Thanks to [dfunke](https://github.com/dfunke) for this feature!
 
 
+Credit cards
+------------
+Credit card accounts (offered by the Sparkassen-Finanzgruppe among others) are supported alongside
+regular accounts. They have no IBAN, so they appear in the account picker by their product name and
+account number rather than an IBAN, and they are imported via the `DKKKU` business transaction.
+
+A few things work differently than for a regular account:
+* In a configuration file, select a credit card account with `bank_account_number` (the account
+  number shown in the picker) instead of `bank_account_iban`.
+* Credit card records carry no counterparty account. Each booking therefore becomes a withdrawal
+  from, or a deposit into, the credit card asset account, with the merchant as the other side. The
+  monthly settlement arrives as a deposit and can be turned into a transfer with a Firefly rule.
+* Foreign currency bookings are imported with Firefly's foreign amount and currency set.
+
+
 Storing configurations
 ----------------------
 

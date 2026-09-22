@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Logger;
+use Fhp\Model\CreditCardStatement\CreditCardTransaction;
 use Fhp\Model\StatementOfAccount\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionType;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
@@ -135,15 +136,102 @@ class TransactionsToFireflySender
         );
     }
 
+    public static function transform_credit_card_transaction_to_firefly_request_body(
+        CreditCardTransaction $transaction,
+        int $firefly_account_id,
+        string $regex_match, string $regex_replace
+    )
+    {
+        // Credit card records have no counterparty account (no IBAN, no name), so there is nothing to
+        // match against the user's Firefly accounts and no transfer detection: every booking is a
+        // withdrawal from, or a deposit into, the credit card asset account. The monthly settlement
+        // arrives as a credit and can be turned into a transfer with a Firefly rule afterwards.
+        $isDebit = $transaction->getCreditDebit() === CreditCardTransaction::CD_DEBIT;
+        $amount  = abs($transaction->getAmount());
+
+        // The merchant (first Verwendungszweck line) is the stable counterparty name. getPurpose()
+        // also contains the location and the masked card number and therefore varies per booking, so
+        // it is used only as the description.
+        $counterparty = $transaction->getMerchant();
+        if ($counterparty === null || $counterparty === '') {
+            $counterparty = $transaction->getReference() ?: 'Kreditkartenumsatz';
+        }
+
+        $description = $transaction->getPurpose();
+        if ($description === '') {
+            $description = $counterparty;
+        }
+        if (!empty($regex_match) && !empty($regex_replace) && !empty($description)) {
+            $result = preg_replace($regex_match, $regex_replace, $description);
+            if ($result !== null) {
+                $description = $result;
+            }
+        }
+
+        $firefly_account      = array('id' => $firefly_account_id);
+        $counterparty_account = array('name' => $counterparty);
+        if ($isDebit) {
+            $type        = TransactionType::WITHDRAWAL;
+            $source      = $firefly_account;
+            $destination = $counterparty_account;
+        } else {
+            $type        = TransactionType::DEPOSIT;
+            $source      = $counterparty_account;
+            $destination = $firefly_account;
+        }
+
+        $date = $transaction->getValutaDate() ?? $transaction->getBookingDate();
+
+        $notes = null;
+        if ($transaction->getMerchantCategoryCode() !== null) {
+            $notes = 'Merchant category code: ' . $transaction->getMerchantCategoryCode();
+        }
+
+        $transactionData = array_filter([
+            'type'             => $type,
+            'date'             => $date !== null ? $date->format('Y-m-d') : null,
+            'amount'           => $amount,
+            'description'      => $description,
+            'currency_code'    => $transaction->getCurrency(),
+            'source_name'      => $source['name'] ?? null,
+            'source_id'        => $source['id'] ?? null,
+            'destination_name' => $destination['name'] ?? null,
+            'destination_id'   => $destination['id'] ?? null,
+            // The reference is stable per booking and strengthens Firefly's duplicate detection, which
+            // matters here because credit card records carry no end-to-end id.
+            'external_id'      => $transaction->getReference() ?: null,
+            'notes'            => $notes,
+        ], fn($value) => $value !== null);
+
+        // Report the amount the merchant charged in its original currency, if a conversion took place.
+        if ($transaction->getOriginalAmount() !== null && $transaction->getOriginalCurrency() !== null) {
+            $transactionData['foreign_amount']        = abs($transaction->getOriginalAmount());
+            $transactionData['foreign_currency_code'] = $transaction->getOriginalCurrency();
+        }
+
+        return array(
+            'apply_rules' => true,
+            'error_if_duplicate_hash' => true,
+            'transactions' => array($transactionData)
+        );
+    }
+
     public function send_transactions()
     {
         $result = array();
         foreach ($this->transactions as $transaction) {
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
-            $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
-            );
+            if ($transaction instanceof CreditCardTransaction) {
+                $body = self::transform_credit_card_transaction_to_firefly_request_body(
+                    $transaction, $this->firefly_account_id, $this->regex_match, $this->regex_replace
+                );
+            } else {
+                $body = self::transform_transaction_to_firefly_request_body(
+                    $transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace
+                );
+            }
+            $request->setBody($body);
 
             $response = $request->post();
             if ($response instanceof ValidationErrorResponse) {

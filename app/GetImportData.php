@@ -5,6 +5,7 @@ use App\FinTsFactory;
 use App\Logger;
 use App\Step;
 use App\TanHandler;
+use Fhp\Model\CreditCardAccount;
 use Fhp\Protocol\UnexpectedResponseException;
 
 function GetImportData()
@@ -15,6 +16,19 @@ function GetImportData()
 
     $accounts = unserialize($session->get('accounts'));
     $current_step = new Step($request->request->get("step", Step::STEP0_SETUP));
+
+    // Resolve the account the user chose. The TAN challenge form only posts 'step' and 'tan', so on a
+    // TAN continuation the selection is no longer in the request; remember it in the session.
+    if ($request->request->has('bank_account')) {
+        $session->set('selected_bank_account_index', intval($request->request->get('bank_account')));
+    }
+    $selected_account = $accounts[$session->get('selected_bank_account_index', 0)];
+
+    // Credit card accounts use a different business transaction (DKKKU) and yield a different
+    // transaction model, so they are handled in their own branch.
+    if ($selected_account instanceof CreditCardAccount) {
+        return GetCreditCardImportData($current_step, $selected_account);
+    }
 
     // Determine which format to use
     // Use format detected during login, with exception-based fallback as backup
@@ -147,6 +161,75 @@ function GetImportData()
             // Different error, re-throw
             throw $e;
         }
+    }
+
+    $session->set('persistedFints', $fin_ts->persist());
+    return Step::DONE;
+}
+
+/**
+ * Retrieves credit card transactions (DKKKU) for the selected credit card account. Mirrors the
+ * regular flow, but there is no MT940/CAMT format choice and no counterparty resolution: credit card
+ * records are flat and carry their own model ({@link \Fhp\Model\CreditCardStatement\CreditCardTransaction}).
+ */
+function GetCreditCardImportData(Step $current_step, CreditCardAccount $account)
+{
+    global $request, $session, $twig, $fin_ts, $automate_without_js;
+
+    $cc_handler = new TanHandler(
+        function () use ($account) {
+            global $fin_ts, $request, $session;
+            assert($request->request->has('firefly_account'));
+            assert($request->request->has('date_from'));
+            assert($request->request->has('date_to'));
+            $from = new \DateTime($request->request->get('date_from'));
+            $to = new \DateTime($request->request->get('date_to'));
+            $session->set('firefly_account', $request->request->get('firefly_account'));
+
+            $get_statement = \Fhp\Action\GetCreditCardStatement::create($account, $from, $to);
+            $fin_ts->execute($get_statement);
+            return $get_statement;
+        },
+        'cc-statement',
+        $session,
+        $twig,
+        $fin_ts,
+        $current_step,
+        $request
+    );
+
+    if ($cc_handler->needs_tan()) {
+        $cc_handler->pose_and_render_tan_challenge();
+    } else {
+        /** @var \Fhp\Action\GetCreditCardStatement $finished_action */
+        $finished_action = $cc_handler->get_finished_action();
+        $transactions = $finished_action->getStatement()->getTransactions();
+
+        if (empty($transactions)) {
+            $date_from = $request->request->get('date_from', 'unknown');
+            $date_to = $request->request->get('date_to', 'unknown');
+            Logger::info("No credit card transactions found for date range: {$date_from} to {$date_to}");
+        }
+
+        $session->set('transactions_to_import', serialize($transactions));
+        $session->set('num_transactions_processed', 0);
+        $session->set('import_messages', serialize(array()));
+
+        $fin_ts->close();
+
+        if ($automate_without_js) {
+            $session->set('persistedFints', $fin_ts->persist());
+            return Step::STEP5_RUN_IMPORT_BATCHED;
+        }
+
+        echo $twig->render(
+            'show-credit-card-transactions.twig',
+            array(
+                'transactions' => $transactions,
+                'next_step' => Step::STEP5_RUN_IMPORT_BATCHED,
+                'skip_transaction_review' => $session->get('skip_transaction_review')
+            )
+        );
     }
 
     $session->set('persistedFints', $fin_ts->persist());

@@ -1,0 +1,47 @@
+{% extends 'base.twig' %}
+
+{% import 'macros.twig' as macros %}
+
+{% block title %}Your credit card transactions{% endblock %}
+
+{% block content %}
+    <h1>Your credit card transactions</h1>
+
+    {% if skip_transaction_review %}
+        <p>Automatic skipping of the transaction review was requested in the configuration file.</p>
+        {{ macros.skip_form() }}
+    {% endif %}
+
+    <p>The following credit card transactions will be imported to Firefly III.</p>
+
+    <form name="next-form" action="." method="post">
+        <input type="hidden" name="step" value="{{ next_step }}">
+        <button type="submit" class="btn btn-primary">Import transactions to FireflyIII</button>
+    </form>
+
+    <ul class="list-unstyled">
+    {% for transaction in transactions %}
+    <li class="mt-3">
+        <div class="card">
+            <div class="card-header">
+                <strong>
+                    {% if transaction.getCreditDebit() == 'debit' %}-{% endif %}{{ transaction.getAmount() | abs }}&nbsp;{{ transaction.getCurrency() }}
+                </strong>
+                {% if transaction.getCreditDebit() == 'debit' %}to{% else %}from{% endif %}
+                {{ transaction.getMerchant() }}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <p>{{ transaction.getPurpose() }}</p>
+                    {% if transaction.getOriginalCurrency() and transaction.getOriginalCurrency() != transaction.getCurrency() %}
+                        <p>{{ transaction.getOriginalAmount() | abs }}&nbsp;{{ transaction.getOriginalCurrency() }}
+                        (rate {{ transaction.getExchangeRate() }})</p>
+                    {% endif %}
+                    {% if transaction.getMerchantCategoryCode() %}<p>MCC {{ transaction.getMerchantCategoryCode() }}</p>{% endif %}
+                </li>
+            </ul>
+        </div>
+    </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

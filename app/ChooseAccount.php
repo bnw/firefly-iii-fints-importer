@@ -2,8 +2,10 @@
 namespace App\StepFunction;
 
 use App\FinTsFactory;
+use App\Logger;
 use App\Step;
 use App\TanHandler;
+use Fhp\Model\CreditCardAccount;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -34,7 +36,35 @@ function ChooseAccount()
     } else {
         /** @var \Fhp\Action\GetSEPAAccounts $get_sepa_accounts_action */
         $get_sepa_accounts_action = $list_accounts_handler->get_finished_action();
-        $bank_accounts            = $get_sepa_accounts_action->getAccounts();
+        $bank_accounts            = array_values($get_sepa_accounts_action->getAccounts());
+
+        // Credit card accounts have no IBAN and are therefore not part of GetSEPAAccounts (HKSPA).
+        // GetCreditCardAccounts reads them from the UPD received during login and needs no request to
+        // the bank, so this cannot pose a TAN challenge. Append them to the same list; from here on an
+        // account is identified by its index, regardless of its type.
+        try {
+            $get_credit_card_accounts = \Fhp\Action\GetCreditCardAccounts::create();
+            $fin_ts->execute($get_credit_card_accounts);
+            $bank_accounts = array_merge($bank_accounts, array_values($get_credit_card_accounts->getAccounts()));
+        } catch (\Throwable $e) {
+            // A bank that does not offer credit card statements should not break the regular flow.
+            Logger::info('Could not determine credit card accounts: ' . $e->getMessage());
+        }
+
+        // The account objects differ (SEPAAccount vs. CreditCardAccount) and expose different fields,
+        // so pre-compute a display label per account instead of calling type-specific getters in the
+        // template.
+        $account_labels = array();
+        foreach ($bank_accounts as $bank_account) {
+            if ($bank_account instanceof CreditCardAccount) {
+                $account_labels[] = trim(($bank_account->getProductName() ?: 'Credit card')
+                    . ' - ' . $bank_account->getAccountNumber());
+            } else {
+                $account_labels[] = ($bank_account->getIban() ? $bank_account->getIban() . ' - ' : '')
+                    . $bank_account->getSubAccount() . ', ' . $bank_account->getAccountNumber();
+            }
+        }
+
         $firefly_accounts_request = new GetAccountsRequest($session->get('firefly_url'), $session->get('firefly_access_token'));
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
         /** @var \GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse $firefly_accounts */
@@ -42,18 +72,31 @@ function ChooseAccount()
 
         $requested_bank_index = -1;
         $requested_bank_iban = $session->get('bank_account_iban');
+        $requested_bank_number = $session->get('bank_account_number');
         $requested_firefly_id = $session->get('firefly_account_id');
         $error = '';
 
-        if (!is_null($requested_bank_iban)) {
+        // A regular account is selected by IBAN, a credit card account by its account number.
+        if (!is_null($requested_bank_iban) || !is_null($requested_bank_number)) {
             for ($i = 0; $i < count($bank_accounts); $i++) {
-                if ($bank_accounts[$i]->getIban() == $requested_bank_iban) {
-                    $requested_bank_index = $i;
-                    break;
+                $candidate = $bank_accounts[$i];
+                if ($candidate instanceof CreditCardAccount) {
+                    if (!is_null($requested_bank_number) && $candidate->getAccountNumber() == $requested_bank_number) {
+                        $requested_bank_index = $i;
+                        break;
+                    }
+                } else {
+                    if (!is_null($requested_bank_iban) && $candidate->getIban() == $requested_bank_iban) {
+                        $requested_bank_index = $i;
+                        break;
+                    }
                 }
             }
             if ($requested_bank_index == -1) {
-                $error = $error . 'Could not find IBAN "' . $requested_bank_iban . '" in your bank accounts.' . "\n";
+                $wanted = is_null($requested_bank_iban)
+                    ? 'credit card account number "' . $requested_bank_number . '"'
+                    : 'IBAN "' . $requested_bank_iban . '"';
+                $error = $error . 'Could not find ' . $wanted . ' in your bank accounts.' . "\n";
                 $error = $error . 'Please review your configuration.' . "\n";
             }
         }
@@ -108,6 +151,7 @@ function ChooseAccount()
                 array(
                     'next_step' => Step::STEP4_GET_IMPORT_DATA,
                     'bank_accounts' => $bank_accounts,
+                    'account_labels' => $account_labels,
                     'firefly_accounts' => $firefly_accounts,
                     'default_from_date' => $default_from_date,
                     'default_to_date' => $default_to_date,

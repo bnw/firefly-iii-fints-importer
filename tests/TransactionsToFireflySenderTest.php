@@ -4,6 +4,7 @@ use App\Configuration;
 use App\ConfigurationFactory;
 use App\TransactionsToFireflySender;
 use Fhp\Model\StatementOfAccount\Transaction;
+use Fhp\Model\CreditCardStatement\CreditCardTransaction;
 use PHPUnit\Framework\TestCase;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
@@ -267,6 +268,100 @@ final class TransactionsToFireflySenderTest extends TestCase
             $this->firefly_account_id, $this->firefly_accounts, $regex_match, $regex_replace
         );
         restore_error_handler();
+    }
+
+    // The values below mirror the DKKKU test fixtures in phpFinTS, which are modelled on real
+    // BW-Bank/LBBW responses (merchant in the first Verwendungszweck line, location plus masked card
+    // number in the second).
+    private function make_credit_card_transaction(): CreditCardTransaction
+    {
+        $tx = new CreditCardTransaction();
+        $tx->setCreditDebit(CreditCardTransaction::CD_DEBIT);
+        $tx->setAmount(-12.34);
+        $tx->setCurrency('EUR');
+        $tx->setValutaDate(new DateTime('2026-07-17'));
+        $tx->setBookingDate(new DateTime('2026-07-18'));
+        $tx->setPurpose('EXAMPLE SHOP BERLIN 555500******2233');
+        $tx->setPurposeLines(array('EXAMPLE SHOP', 'BERLIN 555500******2233'));
+        $tx->setReference('1000000000000001');
+        $tx->setMerchantCategoryCode('5411');
+        return $tx;
+    }
+
+    public function test_credit_card_debit_is_a_withdrawal_to_the_merchant()
+    {
+        $body = TransactionsToFireflySender::transform_credit_card_transaction_to_firefly_request_body(
+            $this->make_credit_card_transaction(), $this->firefly_account_id, '', ''
+        );
+        $tx = $body['transactions'][0];
+
+        $this->assertEquals('withdrawal', $tx['type']);
+        $this->assertEquals(12.34, $tx['amount']);              // absolute value; the sign is the type
+        $this->assertEquals('2026-07-17', $tx['date']);         // Belegdatum (valuta), not booking date
+        $this->assertEquals('EUR', $tx['currency_code']);
+        $this->assertEquals($this->firefly_account_id, $tx['source_id']);
+        $this->assertEquals('EXAMPLE SHOP', $tx['destination_name']);  // merchant only, no location/PAN
+        $this->assertEquals('EXAMPLE SHOP BERLIN 555500******2233', $tx['description']);
+        $this->assertEquals('1000000000000001', $tx['external_id']);
+        $this->assertEquals('Merchant category code: 5411', $tx['notes']);
+        $this->assertArrayNotHasKey('foreign_amount', $tx);
+    }
+
+    public function test_credit_card_credit_is_a_deposit_from_the_counterparty()
+    {
+        $tx = $this->make_credit_card_transaction();
+        $tx->setCreditDebit(CreditCardTransaction::CD_CREDIT);
+        $tx->setAmount(1000.0);
+        $tx->setPurpose('Ausgleich Kreditkartenabrechnung 555500******2200');
+        $tx->setPurposeLines(array('Ausgleich Kreditkartenabrechnung', '555500******2200'));
+        $tx->setReference('1000000000000003');
+        $tx->setMerchantCategoryCode(null);
+
+        $body = TransactionsToFireflySender::transform_credit_card_transaction_to_firefly_request_body(
+            $tx, $this->firefly_account_id, '', ''
+        );
+        $data = $body['transactions'][0];
+
+        $this->assertEquals('deposit', $data['type']);
+        $this->assertEquals(1000.0, $data['amount']);
+        $this->assertEquals('Ausgleich Kreditkartenabrechnung', $data['source_name']);
+        $this->assertEquals($this->firefly_account_id, $data['destination_id']);
+        $this->assertArrayNotHasKey('notes', $data);            // no merchant category code on a settlement
+    }
+
+    public function test_credit_card_foreign_currency_sets_foreign_amount()
+    {
+        $tx = $this->make_credit_card_transaction();
+        $tx->setAmount(-45.0);
+        $tx->setCurrency('EUR');
+        $tx->setOriginalAmount(-50.0);
+        $tx->setOriginalCurrency('USD');
+        $tx->setExchangeRate(0.9);
+
+        $body = TransactionsToFireflySender::transform_credit_card_transaction_to_firefly_request_body(
+            $tx, $this->firefly_account_id, '', ''
+        );
+        $data = $body['transactions'][0];
+
+        $this->assertEquals(45.0, $data['amount']);
+        $this->assertEquals(50.0, $data['foreign_amount']);     // absolute original amount
+        $this->assertEquals('USD', $data['foreign_currency_code']);
+    }
+
+    public function test_credit_card_falls_back_to_reference_when_merchant_missing()
+    {
+        $tx = $this->make_credit_card_transaction();
+        $tx->setPurposeLines(array());                          // no merchant line at all
+        $tx->setPurpose('');
+        $tx->setReference('REF-XYZ');
+
+        $body = TransactionsToFireflySender::transform_credit_card_transaction_to_firefly_request_body(
+            $tx, $this->firefly_account_id, '', ''
+        );
+        $data = $body['transactions'][0];
+
+        $this->assertEquals('REF-XYZ', $data['destination_name']);  // reference used as counterparty
+        $this->assertEquals('REF-XYZ', $data['description']);       // description falls back too
     }
 
 }

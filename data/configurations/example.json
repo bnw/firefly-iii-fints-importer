@@ -17,6 +17,7 @@
   "choose_account_automation":
   {
     "bank_account_iban": "",
+    "__bank_account_number_comment__": "For a credit card account (which has no IBAN), omit bank_account_iban and set bank_account_number instead, to the credit card account number shown in the account picker during a manual import.",
     "firefly_account_id": "",
     "__from_to_comment__": "The following values will be passed directly into DateTime. Set them to null to choose them manually during import process.",
     "from": "now - 7 days",
