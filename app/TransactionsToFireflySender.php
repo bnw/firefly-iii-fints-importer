@@ -22,7 +22,8 @@ class TransactionsToFireflySender
      */
     public function __construct(array $transactions, string $firefly_url, string $firefly_access_token, 
                                 int $firefly_account_id,
-                                string $regex_match, string $regex_replace)
+                                string $regex_match, string $regex_replace,
+                                string $ignore_counterparty_iban_regex = "")
     {
         $this->transactions         = $transactions;
         $this->firefly_url          = $firefly_url;
@@ -30,6 +31,7 @@ class TransactionsToFireflySender
         $this->firefly_account_id   = $firefly_account_id;
         $this->regex_match          = $regex_match;
         $this->regex_replace        = $regex_replace;
+        $this->ignore_counterparty_iban_regex = $ignore_counterparty_iban_regex;
 
         $firefly_accounts_request = new GetAccountsRequest($this->firefly_url, $this->firefly_access_token);
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
@@ -46,17 +48,44 @@ class TransactionsToFireflySender
         }
     }
 
+    /**
+     * Whether the counterparty IBAN of this transaction must not be handed to Firefly III.
+     *
+     * Firefly III looks up the destination account by IBAN first and by name only afterwards. For payments that
+     * are settled through a payment processor (card payments, for example) the IBAN belongs to the processor
+     * and is shared by many merchants. The first merchant that was stored with that IBAN then wins, and every
+     * later merchant ends up on its account. The regular expression from the configuration is matched against
+     * the booking text and the description; if it matches, only the counterparty name is sent.
+     */
+    public static function must_ignore_counterparty_iban(Transaction $transaction, string $ignore_regex): bool
+    {
+        if ($ignore_regex === "") {
+            return false;
+        }
+        $subject = trim($transaction->getBookingText() . "\n" . $transaction->getMainDescription());
+        $result  = @preg_match($ignore_regex, $subject);
+        if ($result === false) {
+            throw new \Exception("Error in regular expression!\nignore_counterparty_iban_regex {$ignore_regex}");
+        }
+        return $result === 1;
+    }
+
     public static function transform_transaction_to_firefly_request_body(
         Transaction $transaction,
         int $firefly_account_id,
         GetAccountsResponse $firefly_accounts,
-        string $regex_match, string $regex_replace
+        string $regex_match, string $regex_replace,
+        string $ignore_counterparty_iban_regex = ""
     )
     {
         $debitOrCredit = $transaction->getCreditDebit();
         $amount        = $transaction->getAmount();
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
+        if (self::must_ignore_counterparty_iban($transaction, $ignore_counterparty_iban_regex)) {
+            // Neither used for transfer detection nor sent to Firefly III, see must_ignore_counterparty_iban().
+            $destination['iban'] = null;
+        }
 
         Logger::trace("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
 
@@ -142,7 +171,7 @@ class TransactionsToFireflySender
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
             $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
+                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace, $this->ignore_counterparty_iban_regex)
             );
 
             $response = $request->post();
@@ -167,4 +196,5 @@ class TransactionsToFireflySender
     private $firefly_accounts;
     private $regex_match;
     private $regex_replace;
+    private $ignore_counterparty_iban_regex;
 }

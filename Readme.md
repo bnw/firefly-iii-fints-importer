@@ -45,6 +45,8 @@ Tips
 * There is the option to reformat the description of a transaction, before it is sent to Firefly III.
   This can be done by configuring a RegEx search and replace pair. See [data/configurations/example.json](https://github.com/bnw/firefly-iii-fints-importer/blob/master/data/configurations/example.json) or the [corresponding unit test](https://github.com/bnw/firefly-iii-fints-importer/blob/master/tests/TransactionsToFireflySenderTest.php) for an example. Thanks to [dfunke](https://github.com/dfunke) for this feature!
 
+* Firefly III assigns the destination account of a transaction by IBAN first and by name second. Payments that are settled through a payment processor, card payments for example, carry the IBAN of the processor, which is shared by many merchants; the first merchant stored with that IBAN then wins and the others are booked to its account. Set `ignore_counterparty_iban_regex` in the configuration to a regular expression that matches such transactions (it is tested against the booking text and the description, e.g. `"/Debitk\\.|KARTE/i"`). For matching transactions only the counterparty name is sent to Firefly III, so each merchant gets its own account. These transactions are not detected as transfers between your own accounts.
+
 
 Storing configurations
 ----------------------
