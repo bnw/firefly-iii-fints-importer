@@ -9,7 +9,9 @@ use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTransactionResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Request\GetTransactionsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
+use GrumpyDictator\FFIIIApiSupport\Response\GetTransactionsResponse;
 
 class TransactionsToFireflySender
 {
@@ -135,15 +137,121 @@ class TransactionsToFireflySender
         );
     }
 
+    /**
+     * Key identifying "the same" transfer independent of its description: valuta date, amount, source and
+     * destination account. Returns null for anything that is not a transfer between two known accounts.
+     */
+    public static function transfer_key(array $transactionData): ?string
+    {
+        if (($transactionData['type'] ?? null) !== TransactionType::TRANSFER
+            || !isset($transactionData['source_id'], $transactionData['destination_id'], $transactionData['date'])) {
+            return null;
+        }
+        return self::build_transfer_key(
+            $transactionData['date'], $transactionData['amount'],
+            (int)$transactionData['source_id'], (int)$transactionData['destination_id']
+        );
+    }
+
+    private static function build_transfer_key(string $date, $amount, int $source_id, int $destination_id): string
+    {
+        $normalized_amount = rtrim(rtrim(number_format(abs((float)$amount), 8, '.', ''), '0'), '.');
+        return substr($date, 0, 10) . '|' . $normalized_amount . '|' . $source_id . '|' . $destination_id;
+    }
+
+    /**
+     * Counts the transfers Firefly III already knows, per transfer_key().
+     *
+     * @return int[] key => number of existing transfers
+     */
+    public static function count_existing_transfers(GetTransactionsResponse $existing): array
+    {
+        $counts = array();
+        foreach ($existing as $group) {
+            foreach ($group->transactions as $transaction) {
+                if ($transaction->type !== TransactionType::TRANSFER) {
+                    continue;
+                }
+                $key = self::build_transfer_key(
+                    $transaction->date, $transaction->amount, $transaction->sourceId, $transaction->destinationId
+                );
+                $counts[$key] = ($counts[$key] ?? 0) + 1;
+            }
+        }
+        return $counts;
+    }
+
+    /**
+     * Both accounts of an internal transfer are imported separately, and each import produces a transfer for
+     * it. Their descriptions differ (the debit side carries the purpose, the credit side often only the
+     * booking text), so Firefly III's hash based duplicate detection does not recognise them as one.
+     *
+     * Removes the transfers Firefly III already has, comparing date, amount and both accounts instead of the
+     * description. This counts instead of just skipping: if a statement contains the same transfer twice
+     * (two genuine transfers of the same amount on the same day), both are kept unless Firefly III already has
+     * them, so a repeated import or the counterpart account's import adds nothing, but real repeats survive.
+     *
+     * @param array[] $request_bodies bodies as built by transform_transaction_to_firefly_request_body()
+     * @param int[]   $existing_counts result of count_existing_transfers()
+     * @return array[] the bodies that still have to be posted, in their original order
+     */
+    public static function drop_existing_transfers(array $request_bodies, array $existing_counts): array
+    {
+        $remaining = $existing_counts;
+        $result    = array();
+        foreach ($request_bodies as $body) {
+            $key = self::transfer_key($body['transactions'][0]);
+            if ($key !== null && ($remaining[$key] ?? 0) > 0) {
+                $remaining[$key]--;
+                Logger::trace("Skipping transfer already present in Firefly III: $key");
+                continue;
+            }
+            $result[] = $body;
+        }
+        return $result;
+    }
+
+    private function remove_transfers_already_in_firefly(array $request_bodies): array
+    {
+        $dates = array();
+        foreach ($request_bodies as $body) {
+            if (self::transfer_key($body['transactions'][0]) !== null) {
+                $dates[] = substr($body['transactions'][0]['date'], 0, 10);
+            }
+        }
+        if (count($dates) === 0) {
+            return $request_bodies;
+        }
+
+        try {
+            $request = new GetTransactionsRequest($this->firefly_url, $this->firefly_access_token);
+            $request->setFilter(min($dates), max($dates), 'transfers');
+            $existing = $request->get();
+        } catch (\Exception $e) {
+            // Fall back to the previous behaviour rather than failing the whole import.
+            Logger::trace("Could not load existing transfers, importing without transfer de-duplication: " . $e->getMessage());
+            return $request_bodies;
+        }
+
+        return self::drop_existing_transfers($request_bodies, self::count_existing_transfers($existing));
+    }
+
     public function send_transactions()
     {
+        $request_bodies = array();
+        foreach ($this->transactions as $index => $transaction) {
+            $request_bodies[$index] = self::transform_transaction_to_firefly_request_body(
+                $transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace
+            );
+        }
+        $to_send = $this->remove_transfers_already_in_firefly($request_bodies);
+
         $result = array();
-        foreach ($this->transactions as $transaction) {
+        foreach ($to_send as $index => $body) {
+            $transaction = $this->transactions[$index];
             $request = new PostTransactionRequest($this->firefly_url, $this->firefly_access_token);
 
-            $request->setBody(
-                self::transform_transaction_to_firefly_request_body($transaction, $this->firefly_account_id, $this->firefly_accounts, $this->regex_match, $this->regex_replace)
-            );
+            $request->setBody($body);
 
             $response = $request->post();
             if ($response instanceof ValidationErrorResponse) {
